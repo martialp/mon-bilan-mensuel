@@ -122,7 +122,13 @@ git merge --continue
 
 ### Configure
 
-You can then update configs in the `.env` files to customize your configurations.
+First, copy the example environment file to create your local configuration:
+
+```bash
+cp .env.example .env
+```
+
+You can then update configs in the `.env` file to customize your configurations.
 
 Before deploying it, make sure you change at least the values for:
 

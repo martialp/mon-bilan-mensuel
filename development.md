@@ -1,5 +1,15 @@
 # FastAPI Project - Development
 
+## Initial Setup
+
+Before starting, copy the example environment file to create your local `.env`:
+
+```bash
+cp .env.example .env
+```
+
+This creates a `.env` file with default values for local development. You can customize it as needed, but the defaults should work for local development with Docker Compose.
+
 ## Docker Compose
 
 * Start the local stack with Docker Compose:

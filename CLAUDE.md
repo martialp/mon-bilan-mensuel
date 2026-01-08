@@ -33,6 +33,16 @@ This is a full-stack web application with:
 
 The API is versioned under `/api/v1/` prefix (see `API_V1_STR` in config). The OpenAPI schema is available at `/api/v1/openapi.json`.
 
+## Initial Setup
+
+Before starting development, copy the example environment file:
+
+```bash
+cp .env.example .env
+```
+
+This creates a `.env` file with default values for local development. The `.env` file is git-ignored to keep sensitive configurations local. Customize as needed for your environment.
+
 ## Common Development Commands
 
 ### Docker Compose (Recommended)
