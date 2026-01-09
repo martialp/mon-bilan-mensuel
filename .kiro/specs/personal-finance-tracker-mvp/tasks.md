@@ -55,14 +55,14 @@ This implementation plan breaks down the personal finance tracker MVP into discr
 - [ ] 5. Checkpoint - Ensure basic models and endpoints work
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 6. Create API endpoints for transaction management
+- [x] 6. Create API endpoints for transaction management
   - Implement transaction routes (create, read, update, delete)
   - Add duplicate transaction prevention with unique constraint handling
   - Implement transaction filtering by account, category, status, and date range
   - Add specialized endpoints for uncategorized and pending confirmation transactions
   - _Requirements: 1.1, 1.4, 1.6, 2.2, 5.2_
 
-- [ ] 6.1 Write property tests for transaction endpoints
+- [x] 6.1 Write property tests for transaction endpoints
   - **Property 4: Duplicate Transaction Prevention**
   - **Property 6: Transaction Update Integrity**
   - **Property 8: Transaction Status Filtering**
