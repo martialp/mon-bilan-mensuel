@@ -30,13 +30,13 @@ This implementation plan breaks down the personal finance tracker MVP into discr
   - **Property 14: Account Type Validation**
   - **Validates: Requirements 1.2, 1.3, 3.2**
 
-- [ ] 3. Create API endpoints for account management
+- [x] 3. Create API endpoints for account management
   - Implement account routes (create, read, update, delete)
   - Add account validation and error handling
   - Implement referential integrity protection for account deletion
   - _Requirements: 3.1, 3.3, 3.4, 3.5_
 
-- [ ] 3.1 Write property tests for account endpoints
+- [x] 3.1 Write property tests for account endpoints
   - **Property 15: Account Data Retrieval**
   - **Property 16: Account Deletion Protection**
   - **Property 17: Account Update Preservation**
