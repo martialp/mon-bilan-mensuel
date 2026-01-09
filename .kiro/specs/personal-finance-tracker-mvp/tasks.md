@@ -80,7 +80,7 @@ This implementation plan breaks down the personal finance tracker MVP into discr
   - **Property 12: Status Transition Confirmation**
   - **Validates: Requirements 2.1, 2.4, 2.5, 2.7**
 
-- [ ] 8. Create analysis and reporting endpoints
+- [x] 8. Create analysis and reporting endpoints
   - Implement spending analysis by category with time period filtering
   - Add monthly spending trends calculation
   - Create percentage calculation for category summaries
@@ -88,7 +88,7 @@ This implementation plan breaks down the personal finance tracker MVP into discr
   - Add multi-account analysis with consolidated and per-account views
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6_
 
-- [ ] 8.1 Write property tests for analysis endpoints
+- [x] 8.1 Write property tests for analysis endpoints
   - **Property 18: Category Spending Calculation**
   - **Property 19: Monthly Trend Accuracy**
   - **Property 20: Percentage Calculation Accuracy**
