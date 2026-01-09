@@ -42,13 +42,13 @@ This implementation plan breaks down the personal finance tracker MVP into discr
   - **Property 17: Account Update Preservation**
   - **Validates: Requirements 3.3, 3.4, 3.5**
 
-- [ ] 4. Create API endpoints for category management
+- [x] 4. Create API endpoints for category management
   - Implement category routes (create, read, update, delete)
   - Add category uniqueness validation
   - Implement referential integrity protection for category deletion
   - _Requirements: 2.3, 5.4_
 
-- [ ] 4.1 Write property tests for category endpoints
+- [x] 4.1 Write property tests for category endpoints
   - **Property 9: Category Creation and Uniqueness**
   - **Validates: Requirements 2.3, 5.4**
 
