@@ -6,12 +6,19 @@ using Hypothesis for property-based testing.
 """
 
 import uuid
+from decimal import Decimal
 
 import pytest
 from hypothesis import given, strategies as st
 from sqlmodel import Session, select
 
 from app.core.db import engine
+from app.crud import (
+    currency_to_cents,
+    cents_to_currency,
+    validate_transaction_type,
+    validate_account_type,
+)
 from app.models import (
     Account,
     AccountCreate,
@@ -196,3 +203,63 @@ class TestTransactionProperties:
             session.delete(retrieved_transaction)
             session.delete(account)
             session.commit()
+
+
+class TestCRUDProperties:
+    """Property-based tests for CRUD operations."""
+
+    @given(currency_amount=st.decimals(min_value=Decimal('0.01'), max_value=Decimal('999999.99'), places=2))
+    def test_currency_conversion_accuracy(self, currency_amount: Decimal):
+        """
+        Property 2: Currency Conversion Accuracy
+        For any valid currency amount, converting to cents and back to currency 
+        should preserve the original value with proper precision.
+        
+        Feature: personal-finance-tracker, Property 2: Currency conversion accuracy
+        **Validates: Requirements 1.2**
+        """
+        # Convert to cents and back
+        cents = currency_to_cents(currency_amount)
+        converted_back = cents_to_currency(cents)
+        
+        # Verify round-trip accuracy
+        assert converted_back == currency_amount
+        assert isinstance(cents, int)
+        assert cents > 0
+
+    @given(transaction_type=st.sampled_from(["expense", "income", "transfer", "invalid_type", "EXPENSE", ""]))
+    def test_transaction_type_validation(self, transaction_type: str):
+        """
+        Property 3: Transaction Type Validation
+        For any transaction creation attempt, only valid transaction types 
+        (expense, income, transfer) should be accepted, and invalid types 
+        should be rejected with appropriate error messages.
+        
+        Feature: personal-finance-tracker, Property 3: Transaction type validation
+        **Validates: Requirements 1.3**
+        """
+        valid_types = {"expense", "income", "transfer"}
+        is_valid = validate_transaction_type(transaction_type)
+        
+        if transaction_type in valid_types:
+            assert is_valid is True
+        else:
+            assert is_valid is False
+
+    @given(account_type=st.sampled_from(["credit_card", "chequing", "savings", "investment", "other", "invalid_type", "CREDIT_CARD", ""]))
+    def test_account_type_validation(self, account_type: str):
+        """
+        Property 14: Account Type Validation
+        For any account creation attempt, only valid account types 
+        (credit_card, chequing, savings, investment, other) should be accepted.
+        
+        Feature: personal-finance-tracker, Property 14: Account type validation
+        **Validates: Requirements 3.2**
+        """
+        valid_types = {"credit_card", "chequing", "savings", "investment", "other"}
+        is_valid = validate_account_type(account_type)
+        
+        if account_type in valid_types:
+            assert is_valid is True
+        else:
+            assert is_valid is False

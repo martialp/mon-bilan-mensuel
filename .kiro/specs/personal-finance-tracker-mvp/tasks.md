@@ -18,13 +18,13 @@ This implementation plan breaks down the personal finance tracker MVP into discr
   - **Property 9: Category Creation and Uniqueness**
   - **Validates: Requirements 1.1, 3.1, 2.3**
 
-- [ ] 2. Implement core CRUD operations
+- [x] 2. Implement core CRUD operations
   - Add CRUD functions in crud.py for accounts, categories, and transactions
   - Implement currency conversion utilities (dollars to cents and back)
   - Add validation logic for transaction types and account types
   - _Requirements: 1.2, 1.3, 1.5, 3.2_
 
-- [ ] 2.1 Write property tests for CRUD operations
+- [x] 2.1 Write property tests for CRUD operations
   - **Property 2: Currency Conversion Accuracy**
   - **Property 3: Transaction Type Validation**
   - **Property 14: Account Type Validation**
