@@ -68,13 +68,13 @@ This implementation plan breaks down the personal finance tracker MVP into discr
   - **Property 8: Transaction Status Filtering**
   - **Validates: Requirements 1.4, 1.6, 2.2**
 
-- [ ] 7. Implement transaction categorization logic
+- [x] 7. Implement transaction categorization logic
   - Add manual categorization endpoint that sets status to 'manual'
   - Add confirmation endpoint that changes status from 'auto' to 'confirmed'
   - Implement status preservation logic for manually categorized transactions
   - _Requirements: 2.1, 2.4, 2.5, 2.7_
 
-- [ ] 7.1 Write property tests for categorization logic
+- [x] 7.1 Write property tests for categorization logic
   - **Property 7: Manual Categorization Workflow**
   - **Property 10: Category Update Flexibility**
   - **Property 12: Status Transition Confirmation**

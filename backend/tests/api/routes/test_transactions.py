@@ -436,3 +436,203 @@ def test_confirm_non_auto_transaction(client: TestClient, db: Session):
     db.delete(transaction)
     db.delete(account)
     db.commit()
+
+
+class TestCategorizationProperties:
+    """Property-based tests for transaction categorization logic."""
+
+    @given(transaction_data=transaction_data())
+    def test_manual_categorization_workflow(self, client: TestClient, db: Session, transaction_data: dict):
+        """
+        Property 7: Manual Categorization Workflow
+        For any transaction that is manually assigned a category, the category_id should be 
+        updated and the status should be set to 'manual' and never changed automatically.
+        
+        Feature: personal-finance-tracker, Property 7: Manual categorization workflow
+        **Validates: Requirements 2.1, 2.5**
+        """
+        # Create test account and category
+        account = create_test_account(db)
+        category = create_test_category(db)
+        transaction_data["account_id"] = str(account.id)
+        transaction_data["category_id"] = None  # Start uncategorized
+        
+        # Create transaction via API
+        response = client.post(
+            f"{settings.API_V1_STR}/transactions/",
+            json=transaction_data,
+        )
+        assert response.status_code == 200
+        created_transaction = response.json()
+        transaction_id = created_transaction["id"]
+        
+        # Manually categorize the transaction
+        response = client.put(
+            f"{settings.API_V1_STR}/transactions/{transaction_id}/categorize",
+            params={"category_id": str(category.id)},
+        )
+        assert response.status_code == 200
+        categorized_transaction = response.json()
+        
+        # Verify manual categorization properties
+        assert categorized_transaction["category_id"] == str(category.id)
+        assert categorized_transaction["status"] == "manual"
+        
+        # Verify the status remains 'manual' after retrieval (never changed automatically)
+        response = client.get(f"{settings.API_V1_STR}/transactions/{transaction_id}")
+        assert response.status_code == 200
+        retrieved_transaction = response.json()
+        assert retrieved_transaction["status"] == "manual"
+        assert retrieved_transaction["category_id"] == str(category.id)
+        
+        # Cleanup
+        client.delete(f"{settings.API_V1_STR}/transactions/{transaction_id}")
+        db.delete(category)
+        db.delete(account)
+        db.commit()
+
+    @given(transaction_data=transaction_data())
+    def test_category_update_flexibility(self, client: TestClient, db: Session, transaction_data: dict):
+        """
+        Property 10: Category Update Flexibility
+        For any transaction, the category assignment should be changeable at any time 
+        while preserving the transaction's other properties.
+        
+        Feature: personal-finance-tracker, Property 10: Category update flexibility
+        **Validates: Requirements 2.4**
+        """
+        # Create test account and two categories
+        account = create_test_account(db)
+        category1 = create_test_category(db, name=f"Category 1 {uuid.uuid4()}")
+        category2 = create_test_category(db, name=f"Category 2 {uuid.uuid4()}")
+        transaction_data["account_id"] = str(account.id)
+        transaction_data["category_id"] = str(category1.id)
+        
+        # Create transaction with initial category
+        response = client.post(
+            f"{settings.API_V1_STR}/transactions/",
+            json=transaction_data,
+        )
+        assert response.status_code == 200
+        created_transaction = response.json()
+        transaction_id = created_transaction["id"]
+        
+        # Store original properties for comparison
+        original_date = created_transaction["date_transaction"]
+        original_description = created_transaction["description"]
+        original_amount = created_transaction["amount_cents"]
+        original_type = created_transaction["type"]
+        original_account_id = created_transaction["account_id"]
+        
+        # Change category using manual categorization
+        response = client.put(
+            f"{settings.API_V1_STR}/transactions/{transaction_id}/categorize",
+            params={"category_id": str(category2.id)},
+        )
+        assert response.status_code == 200
+        updated_transaction = response.json()
+        
+        # Verify category was changed
+        assert updated_transaction["category_id"] == str(category2.id)
+        assert updated_transaction["status"] == "manual"
+        
+        # Verify all other properties are preserved
+        assert updated_transaction["date_transaction"] == original_date
+        assert updated_transaction["description"] == original_description
+        assert updated_transaction["amount_cents"] == original_amount
+        assert updated_transaction["type"] == original_type
+        assert updated_transaction["account_id"] == original_account_id
+        
+        # Change category again using regular update endpoint
+        update_data = {"category_id": str(category1.id)}
+        response = client.put(
+            f"{settings.API_V1_STR}/transactions/{transaction_id}",
+            json=update_data,
+        )
+        assert response.status_code == 200
+        re_updated_transaction = response.json()
+        
+        # Verify category was changed back
+        assert re_updated_transaction["category_id"] == str(category1.id)
+        
+        # Verify all other properties are still preserved
+        assert re_updated_transaction["date_transaction"] == original_date
+        assert re_updated_transaction["description"] == original_description
+        assert re_updated_transaction["amount_cents"] == original_amount
+        assert re_updated_transaction["type"] == original_type
+        assert re_updated_transaction["account_id"] == original_account_id
+        
+        # Cleanup
+        client.delete(f"{settings.API_V1_STR}/transactions/{transaction_id}")
+        db.delete(category1)
+        db.delete(category2)
+        db.delete(account)
+        db.commit()
+
+    def test_status_transition_confirmation(self, client: TestClient, db: Session):
+        """
+        Property 12: Status Transition Confirmation
+        For any transaction with status 'auto', confirming it should change the status 
+        to 'confirmed' while preserving all other transaction properties.
+        
+        Feature: personal-finance-tracker, Property 12: Status transition confirmation
+        **Validates: Requirements 2.7**
+        """
+        # Create test account and category
+        account = create_test_account(db)
+        category = create_test_category(db)
+        
+        # Create auto-categorized transaction directly in database
+        auto_transaction = Transaction(
+            date_transaction=date(2024, 1, 15),
+            description="Auto categorized transaction",
+            amount_cents=5000,
+            type=TransactionType.EXPENSE,
+            account_id=account.id,
+            category_id=category.id,
+            status=TransactionStatus.AUTO,
+            note="Test note",
+            source_file="test_statement.pdf"
+        )
+        db.add(auto_transaction)
+        db.commit()
+        db.refresh(auto_transaction)
+        
+        # Store original properties for comparison
+        original_date = auto_transaction.date_transaction
+        original_description = auto_transaction.description
+        original_amount = auto_transaction.amount_cents
+        original_type = auto_transaction.type
+        original_account_id = auto_transaction.account_id
+        original_category_id = auto_transaction.category_id
+        original_note = auto_transaction.note
+        original_source_file = auto_transaction.source_file
+        
+        # Confirm the auto-categorized transaction
+        response = client.put(f"{settings.API_V1_STR}/transactions/{auto_transaction.id}/confirm")
+        assert response.status_code == 200
+        confirmed_transaction = response.json()
+        
+        # Verify status transition
+        assert confirmed_transaction["status"] == "confirmed"
+        
+        # Verify all other properties are preserved
+        assert confirmed_transaction["date_transaction"] == original_date.isoformat()
+        assert confirmed_transaction["description"] == original_description
+        assert confirmed_transaction["amount_cents"] == original_amount
+        assert confirmed_transaction["type"] == original_type.value
+        assert confirmed_transaction["account_id"] == str(original_account_id)
+        assert confirmed_transaction["category_id"] == str(original_category_id)
+        assert confirmed_transaction["note"] == original_note
+        assert confirmed_transaction["source_file"] == original_source_file
+        
+        # Verify the transaction can no longer be confirmed (should fail)
+        response = client.put(f"{settings.API_V1_STR}/transactions/{auto_transaction.id}/confirm")
+        assert response.status_code == 400
+        assert "Only auto-categorized transactions can be confirmed" in response.json()["detail"]
+        
+        # Cleanup
+        db.delete(auto_transaction)
+        db.delete(category)
+        db.delete(account)
+        db.commit()
