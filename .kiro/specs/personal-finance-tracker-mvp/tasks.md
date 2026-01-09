@@ -6,13 +6,13 @@ This implementation plan breaks down the personal finance tracker MVP into discr
 
 ## Tasks
 
-- [ ] 1. Create database models and migrations
+- [x] 1. Create database models and migrations
   - Create SQLModel classes for Account, Category, and Transaction following existing patterns
   - Generate Alembic migrations for the three new tables with proper constraints
   - Add enum types for account_type, transaction_type, and transaction_status
   - _Requirements: 1.1, 3.1, 2.3_
 
-- [ ] 1.1 Write property tests for database models
+- [x] 1.1 Write property tests for database models
   - **Property 1: Transaction Creation and Persistence**
   - **Property 13: Account Creation and Storage**
   - **Property 9: Category Creation and Uniqueness**
