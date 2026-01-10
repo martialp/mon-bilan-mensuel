@@ -34,7 +34,7 @@ import {
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
-  initialColumnVisibility?: VisibilityState
+  columnVisibility?: VisibilityState
   rowSelection?: RowSelectionState
   onRowSelectionChange?: (selection: RowSelectionState) => void
   getRowId?: (row: TData) => string
@@ -43,7 +43,7 @@ interface DataTableProps<TData, TValue> {
 export function DataTable<TData, TValue>({
   columns,
   data,
-  initialColumnVisibility = {},
+  columnVisibility = {},
   rowSelection,
   onRowSelectionChange,
   getRowId,
@@ -64,7 +64,7 @@ export function DataTable<TData, TValue>({
       : undefined,
     getRowId: getRowId,
     state: {
-      columnVisibility: initialColumnVisibility,
+      columnVisibility,
       rowSelection: rowSelection || {},
     },
   })
@@ -77,8 +77,12 @@ export function DataTable<TData, TValue>({
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id} className="hover:bg-transparent">
               {headerGroup.headers.map((header) => {
+                const width = header.column.getSize()
                 return (
-                  <TableHead key={header.id}>
+                  <TableHead 
+                    key={header.id}
+                    style={{ width: `${width}px`, minWidth: `${width}px` }}
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -95,11 +99,17 @@ export function DataTable<TData, TValue>({
           {table.getRowModel().rows.length ? (
             table.getRowModel().rows.map((row) => (
               <TableRow key={row.id}>
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
+                {row.getVisibleCells().map((cell) => {
+                  const width = cell.column.getSize()
+                  return (
+                    <TableCell 
+                      key={cell.id}
+                      style={{ width: `${width}px`, minWidth: `${width}px` }}
+                    >
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  )
+                })}
               </TableRow>
             ))
           ) : (

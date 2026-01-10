@@ -14,6 +14,7 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
+import { CategorizeTransaction } from "./CategorizeTransaction"
 import DeleteTransaction from "./DeleteTransaction"
 import EditTransaction from "./EditTransaction"
 
@@ -54,18 +55,20 @@ export const TransactionActionsMenu = ({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
+        <CategorizeTransaction
+          transaction={transaction}
+          onSuccess={() => setOpen(false)}
+        />
         {transaction.status === "auto" && (
-          <>
-            <DropdownMenuItem
-              onClick={() => confirmMutation.mutate()}
-              disabled={confirmMutation.isPending}
-            >
-              <Check className="mr-2 h-4 w-4" />
-              Confirm Categorization
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-          </>
+          <DropdownMenuItem
+            onClick={() => confirmMutation.mutate()}
+            disabled={confirmMutation.isPending}
+          >
+            <Check className="mr-2 h-4 w-4" />
+            Confirm Categorization
+          </DropdownMenuItem>
         )}
+        <DropdownMenuSeparator />
         <EditTransaction
           transaction={transaction}
           onSuccess={() => setOpen(false)}

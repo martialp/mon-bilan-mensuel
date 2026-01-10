@@ -112,48 +112,54 @@ export interface TransactionColumnContext {
 export const createColumns = (
   context: TransactionColumnContext,
 ): ColumnDef<TransactionPublic>[] => {
-  const columns: ColumnDef<TransactionPublic>[] = []
-
-  // Add selection column if enabled
-  if (context.enableSelection) {
-    columns.push({
+  const columns: ColumnDef<TransactionPublic>[] = [
+    // Selection column - always present but conditionally rendered
+    {
       id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-        />
-      ),
+      header: ({ table }) =>
+        context.enableSelection ? (
+          <Checkbox
+            checked={
+              table.getIsAllPageRowsSelected() ||
+              (table.getIsSomePageRowsSelected() && "indeterminate")
+            }
+            onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+            aria-label="Select all"
+          />
+        ) : null,
+      cell: ({ row }) =>
+        context.enableSelection ? (
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(value) => row.toggleSelected(!!value)}
+            aria-label="Select row"
+          />
+        ) : null,
       enableSorting: false,
       enableHiding: false,
-    })
-  }
-
-  columns.push(
+      size: 40,
+      minSize: 40,
+      maxSize: 40,
+    },
     {
       accessorKey: "id",
       header: "ID",
       cell: ({ row }) => <CopyId id={row.original.id} />,
+      size: 120,
+      minSize: 120,
+      maxSize: 120,
     },
     {
       accessorKey: "date_transaction",
       header: "Date",
       cell: ({ row }) => (
-        <span className="text-sm">
+        <span className="text-sm whitespace-nowrap">
           {formatDate(row.original.date_transaction)}
         </span>
       ),
+      size: 100,
+      minSize: 100,
+      maxSize: 100,
     },
     {
       accessorKey: "description",
@@ -166,6 +172,8 @@ export const createColumns = (
           {row.original.description}
         </span>
       ),
+      size: 200,
+      minSize: 200,
     },
     {
       accessorKey: "amount_cents",
@@ -176,11 +184,17 @@ export const createColumns = (
           type={row.original.type}
         />
       ),
+      size: 100,
+      minSize: 100,
+      maxSize: 100,
     },
     {
       accessorKey: "type",
       header: "Type",
       cell: ({ row }) => <TransactionTypeCell type={row.original.type} />,
+      size: 100,
+      minSize: 100,
+      maxSize: 100,
     },
     {
       accessorKey: "account_id",
@@ -188,11 +202,14 @@ export const createColumns = (
       cell: ({ row }) => {
         const accountName = context.accounts.get(row.original.account_id)
         return (
-          <span className="text-sm text-muted-foreground">
+          <span className="text-sm text-muted-foreground truncate block max-w-[120px]">
             {accountName || "Unknown"}
           </span>
         )
       },
+      size: 120,
+      minSize: 120,
+      maxSize: 120,
     },
     {
       accessorKey: "category_id",
@@ -207,13 +224,19 @@ export const createColumns = (
           )
         }
         const categoryName = context.categories.get(categoryId)
-        return <span className="text-sm">{categoryName || "Unknown"}</span>
+        return <span className="text-sm truncate block max-w-[120px]">{categoryName || "Unknown"}</span>
       },
+      size: 120,
+      minSize: 120,
+      maxSize: 120,
     },
     {
       accessorKey: "status",
       header: "Status",
       cell: ({ row }) => <TransactionStatusBadge status={row.original.status} />,
+      size: 130,
+      minSize: 130,
+      maxSize: 130,
     },
     {
       id: "actions",
@@ -227,8 +250,11 @@ export const createColumns = (
           />
         </div>
       ),
+      size: 50,
+      minSize: 50,
+      maxSize: 50,
     },
-  )
+  ]
 
   return columns
 }

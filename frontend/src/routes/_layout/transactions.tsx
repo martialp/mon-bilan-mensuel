@@ -139,7 +139,7 @@ function TransactionsTableContent({
     <DataTable
       columns={columns}
       data={transactions.data}
-      initialColumnVisibility={{ id: false }}
+      columnVisibility={{ id: false, select: enableSelection }}
       rowSelection={rowSelection}
       onRowSelectionChange={onRowSelectionChange}
       getRowId={(row) => row.id}
