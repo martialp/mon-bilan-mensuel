@@ -29,13 +29,14 @@ def read_transactions(
     skip: int = 0,
     limit: int = 100,
     account_id: uuid.UUID | None = Query(None, description="Filter by account ID"),
-    category_id: uuid.UUID | None = Query(None, description="Filter by category ID"),
+    category_id: str | None = Query(None, description="Filter by category ID (use 'uncategorized' for NULL)"),
     status: TransactionStatus | None = Query(None, description="Filter by transaction status"),
-    date_from: date | None = Query(None, description="Filter transactions from this date (inclusive)"),
-    date_to: date | None = Query(None, description="Filter transactions to this date (inclusive)"),
+    start_date: date | None = Query(None, description="Filter transactions from this date (inclusive)"),
+    end_date: date | None = Query(None, description="Filter transactions to this date (inclusive)"),
 ) -> Any:
     """
     Retrieve transactions with optional filtering by account, category, status, and date range.
+    Use category_id='uncategorized' to filter for transactions without a category.
     """
     # Build the base query
     statement = select(Transaction)
@@ -45,13 +46,21 @@ def read_transactions(
     if account_id:
         filters.append(Transaction.account_id == account_id)
     if category_id:
-        filters.append(Transaction.category_id == category_id)
+        if category_id == "uncategorized":
+            filters.append(Transaction.category_id.is_(None))
+        else:
+            try:
+                category_uuid = uuid.UUID(category_id)
+                filters.append(Transaction.category_id == category_uuid)
+            except ValueError:
+                # Invalid UUID, ignore the filter
+                pass
     if status:
         filters.append(Transaction.status == status)
-    if date_from:
-        filters.append(Transaction.date_transaction >= date_from)
-    if date_to:
-        filters.append(Transaction.date_transaction <= date_to)
+    if start_date:
+        filters.append(Transaction.date_transaction >= start_date)
+    if end_date:
+        filters.append(Transaction.date_transaction <= end_date)
     
     if filters:
         statement = statement.where(and_(*filters))
@@ -61,7 +70,10 @@ def read_transactions(
     count = session.exec(count_statement).one()
     
     # Apply pagination and execute
-    statement = statement.offset(skip).limit(limit).order_by(Transaction.date_transaction.desc())
+    statement = statement.offset(skip).limit(limit).order_by(
+        Transaction.date_transaction.desc(),
+        Transaction.created_at.desc()
+    )
     transactions = session.exec(statement).all()
     
     return TransactionsPublic(data=transactions, count=count)

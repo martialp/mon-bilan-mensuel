@@ -25,7 +25,7 @@ interface TransactionFiltersProps {
   categories: CategoryPublic[]
 }
 
-const UNCATEGORIZED_VALUE = "__uncategorized__"
+const UNCATEGORIZED_VALUE = "uncategorized"
 
 export function TransactionFilters({
   filters,
@@ -44,7 +44,7 @@ export function TransactionFilters({
     onFiltersChange({
       ...filters,
       categoryId:
-        value === "all" ? null : value === UNCATEGORIZED_VALUE ? "" : value,
+        value === "all" ? null : value,
     })
   }
 
@@ -73,7 +73,7 @@ export function TransactionFilters({
 
   const hasActiveFilters =
     filters.accountId ||
-    filters.categoryId !== null ||
+    filters.categoryId ||
     filters.startDate ||
     filters.endDate
 
@@ -122,13 +122,7 @@ export function TransactionFilters({
             Category
           </Label>
           <Select
-            value={
-              filters.categoryId === null
-                ? "all"
-                : filters.categoryId === ""
-                  ? UNCATEGORIZED_VALUE
-                  : filters.categoryId
-            }
+            value={filters.categoryId || "all"}
             onValueChange={handleCategoryChange}
           >
             <SelectTrigger id="category-filter" className="h-9">

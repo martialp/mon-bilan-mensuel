@@ -128,7 +128,10 @@ export const createColumns = (
     accessorKey: "description",
     header: "Description",
     cell: ({ row }) => (
-      <span className="max-w-xs truncate block font-medium">
+      <span
+        className="max-w-[200px] truncate block font-medium"
+        title={row.original.description}
+      >
         {row.original.description}
       </span>
     ),

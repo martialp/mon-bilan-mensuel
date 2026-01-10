@@ -119,7 +119,13 @@ function TransactionsTableContent({
     )
   }
 
-  return <DataTable columns={columns} data={transactions.data} />
+  return (
+    <DataTable
+      columns={columns}
+      data={transactions.data}
+      initialColumnVisibility={{ id: false }}
+    />
+  )
 }
 
 function TransactionsTable({ filters }: { filters: TransactionFiltersState }) {

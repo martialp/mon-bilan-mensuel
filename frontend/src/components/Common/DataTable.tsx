@@ -1,5 +1,6 @@
 import {
   type ColumnDef,
+  type VisibilityState,
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
@@ -32,22 +33,28 @@ import {
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
+  initialColumnVisibility?: VisibilityState
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  initialColumnVisibility = {},
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    initialState: {
+      columnVisibility: initialColumnVisibility,
+    },
   })
 
   return (
     <div className="flex flex-col gap-4">
-      <Table>
+      <div className="overflow-x-auto rounded-md border">
+        <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id} className="hover:bg-transparent">
@@ -88,7 +95,8 @@ export function DataTable<TData, TValue>({
             </TableRow>
           )}
         </TableBody>
-      </Table>
+        </Table>
+      </div>
 
       {table.getPageCount() > 1 && (
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 border-t bg-muted/20">
