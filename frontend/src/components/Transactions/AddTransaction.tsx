@@ -42,7 +42,7 @@ import {
 } from "@/components/ui/select"
 import useCustomToast from "@/hooks/useCustomToast"
 import { dollarsToCents, getCurrentDateString } from "@/lib/finance"
-import { handleError } from "@/utils"
+import { ERROR_CODES, extractErrorMessage, getErrorCode } from "@/utils"
 
 const transactionTypes: { value: TransactionType; label: string }[] = [
   { value: "expense", label: "Expense" },
@@ -55,7 +55,10 @@ const formSchema = z.object({
   description: z
     .string()
     .min(1, { message: "Description is required" })
-    .max(500),
+    .max(500, { message: "Description must be 500 characters or less" })
+    .refine((val) => val.trim().length > 0, {
+      message: "Description cannot be only whitespace",
+    }),
   amount: z
     .string()
     .min(1, { message: "Amount is required" })
@@ -65,13 +68,23 @@ const formSchema = z.object({
         return !Number.isNaN(num) && num > 0
       },
       { message: "Amount must be a positive number" },
+    )
+    .refine(
+      (val) => {
+        const num = Number.parseFloat(val)
+        return num <= 999999999.99
+      },
+      { message: "Amount is too large" },
     ),
   type: z.enum(["expense", "income", "transfer"], {
     message: "Transaction type is required",
   }),
   account_id: z.string().min(1, { message: "Account is required" }),
   category_id: z.string().optional(),
-  note: z.string().max(1000).optional(),
+  note: z
+    .string()
+    .max(1000, { message: "Note must be 1000 characters or less" })
+    .optional(),
 })
 
 type FormData = z.infer<typeof formSchema>
@@ -79,7 +92,7 @@ type FormData = z.infer<typeof formSchema>
 const AddTransaction = () => {
   const [isOpen, setIsOpen] = useState(false)
   const queryClient = useQueryClient()
-  const { showSuccessToast, showErrorToast } = useCustomToast()
+  const { showSuccessToast, showErrorToast, showRetryToast } = useCustomToast()
 
   const { data: accounts } = useQuery({
     queryKey: ["accounts"],
@@ -106,6 +119,16 @@ const AddTransaction = () => {
     },
   })
 
+  const createTransactionData = (data: FormData): TransactionCreate => ({
+    date_transaction: data.date_transaction,
+    description: data.description.trim(),
+    amount_cents: dollarsToCents(Number.parseFloat(data.amount)),
+    type: data.type,
+    account_id: data.account_id,
+    category_id: data.category_id || null,
+    note: data.note?.trim() || null,
+  })
+
   const mutation = useMutation({
     mutationFn: (data: TransactionCreate) =>
       TransactionsService.createTransaction({ requestBody: data }),
@@ -123,12 +146,22 @@ const AddTransaction = () => {
       setIsOpen(false)
     },
     onError: (err) => {
-      const errorBody = (err as any)?.body
-      const detail = errorBody?.detail
-      if (typeof detail === "string" && detail.includes("duplicate")) {
-        showErrorToast("A transaction with these details already exists")
+      const errorCode = getErrorCode(err as Error)
+      const errorMessage = extractErrorMessage(err as Error)
+
+      // Handle specific error cases
+      if (errorCode === ERROR_CODES.CONFLICT) {
+        showErrorToast(
+          "A transaction with these details already exists. Please check for duplicates.",
+        )
+      } else if (errorCode === ERROR_CODES.NETWORK_ERROR) {
+        showRetryToast(errorMessage, () => {
+          mutation.mutate(createTransactionData(form.getValues()))
+        })
+      } else if (errorCode === ERROR_CODES.VALIDATION_ERROR) {
+        showErrorToast("Please check your input and try again.")
       } else {
-        handleError.call(showErrorToast, err as any)
+        showErrorToast(errorMessage)
       }
     },
     onSettled: () => {
@@ -137,16 +170,7 @@ const AddTransaction = () => {
   })
 
   const onSubmit = (data: FormData) => {
-    const amountCents = dollarsToCents(Number.parseFloat(data.amount))
-    mutation.mutate({
-      date_transaction: data.date_transaction,
-      description: data.description,
-      amount_cents: amountCents,
-      type: data.type,
-      account_id: data.account_id,
-      category_id: data.category_id || null,
-      note: data.note || null,
-    })
+    mutation.mutate(createTransactionData(data))
   }
 
   return (

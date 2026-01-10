@@ -17,7 +17,7 @@ import {
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import { LoadingButton } from "@/components/ui/loading-button"
 import useCustomToast from "@/hooks/useCustomToast"
-import { handleError } from "@/utils"
+import { ERROR_CODES, extractErrorMessage, getErrorCode } from "@/utils"
 
 interface DeleteAccountProps {
   id: string
@@ -28,7 +28,7 @@ interface DeleteAccountProps {
 const DeleteAccount = ({ id, name, onSuccess }: DeleteAccountProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const queryClient = useQueryClient()
-  const { showSuccessToast, showErrorToast } = useCustomToast()
+  const { showSuccessToast, showErrorToast, showRetryToast } = useCustomToast()
   const { handleSubmit } = useForm()
 
   const deleteAccount = async (id: string) => {
@@ -42,7 +42,31 @@ const DeleteAccount = ({ id, name, onSuccess }: DeleteAccountProps) => {
       setIsOpen(false)
       onSuccess()
     },
-    onError: handleError.bind(showErrorToast),
+    onError: (err) => {
+      const errorCode = getErrorCode(err as Error)
+      const errorMessage = extractErrorMessage(err as Error)
+
+      // Handle specific error cases
+      if (
+        errorCode === ERROR_CODES.CONFLICT ||
+        errorMessage.includes("transactions")
+      ) {
+        showErrorToast(
+          "This account has transactions. Please delete or reassign them first.",
+        )
+      } else if (errorCode === ERROR_CODES.NOT_FOUND) {
+        showErrorToast(
+          "This account no longer exists. It may have been deleted already.",
+        )
+        setIsOpen(false)
+      } else if (errorCode === ERROR_CODES.NETWORK_ERROR) {
+        showRetryToast(errorMessage, () => {
+          mutation.mutate(id)
+        })
+      } else {
+        showErrorToast(errorMessage)
+      }
+    },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["accounts"] })
     },

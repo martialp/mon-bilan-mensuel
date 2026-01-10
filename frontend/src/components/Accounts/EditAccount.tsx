@@ -35,7 +35,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import useCustomToast from "@/hooks/useCustomToast"
-import { handleError } from "@/utils"
+import { ERROR_CODES, extractErrorMessage, getErrorCode } from "@/utils"
 
 const accountTypes: { value: AccountType; label: string }[] = [
   { value: "credit_card", label: "Credit Card" },
@@ -46,12 +46,26 @@ const accountTypes: { value: AccountType; label: string }[] = [
 ]
 
 const formSchema = z.object({
-  name: z.string().min(1, { message: "Name is required" }).max(255),
+  name: z
+    .string()
+    .min(1, { message: "Name is required" })
+    .max(255, { message: "Name must be 255 characters or less" })
+    .refine((val) => val.trim().length > 0, {
+      message: "Name cannot be only whitespace",
+    }),
   type: z.enum(["credit_card", "chequing", "savings", "investment", "other"], {
     message: "Account type is required",
   }),
-  institution: z.string().max(255).optional().nullable(),
-  description: z.string().max(500).optional().nullable(),
+  institution: z
+    .string()
+    .max(255, { message: "Institution must be 255 characters or less" })
+    .optional()
+    .nullable(),
+  description: z
+    .string()
+    .max(500, { message: "Description must be 500 characters or less" })
+    .optional()
+    .nullable(),
 })
 
 type FormData = z.infer<typeof formSchema>
@@ -64,7 +78,7 @@ interface EditAccountProps {
 const EditAccount = ({ account, onSuccess }: EditAccountProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const queryClient = useQueryClient()
-  const { showSuccessToast, showErrorToast } = useCustomToast()
+  const { showSuccessToast, showErrorToast, showRetryToast } = useCustomToast()
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -83,10 +97,10 @@ const EditAccount = ({ account, onSuccess }: EditAccountProps) => {
       AccountsService.updateAccount({
         id: account.id,
         requestBody: {
-          name: data.name,
+          name: data.name.trim(),
           type: data.type,
-          institution: data.institution || null,
-          description: data.description || null,
+          institution: data.institution?.trim() || null,
+          description: data.description?.trim() || null,
         },
       }),
     onSuccess: () => {
@@ -94,7 +108,26 @@ const EditAccount = ({ account, onSuccess }: EditAccountProps) => {
       setIsOpen(false)
       onSuccess()
     },
-    onError: handleError.bind(showErrorToast),
+    onError: (err) => {
+      const errorCode = getErrorCode(err as Error)
+      const errorMessage = extractErrorMessage(err as Error)
+
+      // Handle specific error cases
+      if (errorCode === ERROR_CODES.NOT_FOUND) {
+        showErrorToast(
+          "This account no longer exists. It may have been deleted.",
+        )
+        setIsOpen(false)
+      } else if (errorCode === ERROR_CODES.NETWORK_ERROR) {
+        showRetryToast(errorMessage, () => {
+          form.handleSubmit(onSubmit)()
+        })
+      } else if (errorCode === ERROR_CODES.VALIDATION_ERROR) {
+        showErrorToast("Please check your input and try again.")
+      } else {
+        showErrorToast(errorMessage)
+      }
+    },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["accounts"] })
     },

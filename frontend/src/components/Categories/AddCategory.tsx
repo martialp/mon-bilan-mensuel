@@ -28,10 +28,16 @@ import {
 import { Input } from "@/components/ui/input"
 import { LoadingButton } from "@/components/ui/loading-button"
 import useCustomToast from "@/hooks/useCustomToast"
-import { handleError } from "@/utils"
+import { ERROR_CODES, extractErrorMessage, getErrorCode } from "@/utils"
 
 const formSchema = z.object({
-  name: z.string().min(1, { message: "Name is required" }).max(255),
+  name: z
+    .string()
+    .min(1, { message: "Name is required" })
+    .max(255, { message: "Name must be 255 characters or less" })
+    .refine((val) => val.trim().length > 0, {
+      message: "Name cannot be only whitespace",
+    }),
 })
 
 type FormData = z.infer<typeof formSchema>
@@ -39,7 +45,7 @@ type FormData = z.infer<typeof formSchema>
 const AddCategory = () => {
   const [isOpen, setIsOpen] = useState(false)
   const queryClient = useQueryClient()
-  const { showSuccessToast, showErrorToast } = useCustomToast()
+  const { showSuccessToast, showErrorToast, showRetryToast } = useCustomToast()
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -59,13 +65,24 @@ const AddCategory = () => {
       setIsOpen(false)
     },
     onError: (err) => {
-      // Check for uniqueness violation
-      const errorBody = (err as any)?.body
-      const detail = errorBody?.detail
-      if (typeof detail === "string" && detail.includes("already exists")) {
-        showErrorToast("A category with this name already exists")
+      const errorCode = getErrorCode(err as Error)
+      const errorMessage = extractErrorMessage(err as Error)
+
+      // Handle specific error cases
+      if (errorCode === ERROR_CODES.CONFLICT) {
+        showErrorToast(
+          "A category with this name already exists. Please choose a different name.",
+        )
+        form.setError("name", {
+          type: "manual",
+          message: "This category name is already taken",
+        })
+      } else if (errorCode === ERROR_CODES.NETWORK_ERROR) {
+        showRetryToast(errorMessage, () => {
+          mutation.mutate({ name: form.getValues("name") })
+        })
       } else {
-        handleError.call(showErrorToast, err as any)
+        showErrorToast(errorMessage)
       }
     },
     onSettled: () => {
@@ -75,7 +92,7 @@ const AddCategory = () => {
 
   const onSubmit = (data: FormData) => {
     mutation.mutate({
-      name: data.name,
+      name: data.name.trim(),
     })
   }
 

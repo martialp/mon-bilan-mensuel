@@ -191,14 +191,14 @@ This implementation plan breaks down the personal finance tracker MVP into discr
   - Add loading states and error boundaries
   - _Requirements: 6.1, 6.6_
 
-- [ ] 18. Add comprehensive error handling to frontend
+- [x] 18. Add comprehensive error handling to frontend
   - Implement form validation with Zod schemas
   - Add error toast notifications for API failures
   - Create user-friendly error messages for common scenarios
   - Add retry mechanisms for failed requests
   - _Requirements: 6.5, 7.5_
 
-- [ ] 18.1 Write unit tests for frontend error handling
+- [x] 18.1 Write unit tests for frontend error handling
   - Test form validation error display
   - Test API error handling and user feedback
   - _Requirements: 6.5_

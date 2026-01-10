@@ -17,7 +17,7 @@ import {
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import { LoadingButton } from "@/components/ui/loading-button"
 import useCustomToast from "@/hooks/useCustomToast"
-import { handleError } from "@/utils"
+import { ERROR_CODES, extractErrorMessage, getErrorCode } from "@/utils"
 
 interface DeleteTransactionProps {
   id: string
@@ -32,7 +32,7 @@ const DeleteTransaction = ({
 }: DeleteTransactionProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const queryClient = useQueryClient()
-  const { showSuccessToast, showErrorToast } = useCustomToast()
+  const { showSuccessToast, showErrorToast, showRetryToast } = useCustomToast()
   const { handleSubmit } = useForm()
 
   const deleteTransaction = async (id: string) => {
@@ -46,7 +46,24 @@ const DeleteTransaction = ({
       setIsOpen(false)
       onSuccess()
     },
-    onError: handleError.bind(showErrorToast),
+    onError: (err) => {
+      const errorCode = getErrorCode(err as Error)
+      const errorMessage = extractErrorMessage(err as Error)
+
+      // Handle specific error cases
+      if (errorCode === ERROR_CODES.NOT_FOUND) {
+        showErrorToast(
+          "This transaction no longer exists. It may have been deleted already.",
+        )
+        setIsOpen(false)
+      } else if (errorCode === ERROR_CODES.NETWORK_ERROR) {
+        showRetryToast(errorMessage, () => {
+          mutation.mutate(id)
+        })
+      } else {
+        showErrorToast(errorMessage)
+      }
+    },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["transactions"] })
     },
