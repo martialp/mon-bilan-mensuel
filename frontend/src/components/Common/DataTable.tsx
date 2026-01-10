@@ -1,11 +1,11 @@
 import {
   type ColumnDef,
-  type RowSelectionState,
-  type VisibilityState,
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
+  type RowSelectionState,
   useReactTable,
+  type VisibilityState,
 } from "@tanstack/react-table"
 import {
   ChevronLeft,
@@ -73,56 +73,59 @@ export function DataTable<TData, TValue>({
     <div className="flex flex-col gap-4">
       <div className="overflow-x-auto rounded-md border">
         <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id} className="hover:bg-transparent">
-              {headerGroup.headers.map((header) => {
-                const width = header.column.getSize()
-                return (
-                  <TableHead 
-                    key={header.id}
-                    style={{ width: `${width}px`, minWidth: `${width}px` }}
-                  >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
-                  </TableHead>
-                )
-              })}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id}>
-                {row.getVisibleCells().map((cell) => {
-                  const width = cell.column.getSize()
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id} className="hover:bg-transparent">
+                {headerGroup.headers.map((header) => {
+                  const width = header.column.getSize()
                   return (
-                    <TableCell 
-                      key={cell.id}
+                    <TableHead
+                      key={header.id}
                       style={{ width: `${width}px`, minWidth: `${width}px` }}
                     >
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
+                    </TableHead>
                   )
                 })}
               </TableRow>
-            ))
-          ) : (
-            <TableRow className="hover:bg-transparent">
-              <TableCell
-                colSpan={columns.length}
-                className="h-32 text-center text-muted-foreground"
-              >
-                No results found.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow key={row.id}>
+                  {row.getVisibleCells().map((cell) => {
+                    const width = cell.column.getSize()
+                    return (
+                      <TableCell
+                        key={cell.id}
+                        style={{ width: `${width}px`, minWidth: `${width}px` }}
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                      </TableCell>
+                    )
+                  })}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow className="hover:bg-transparent">
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-32 text-center text-muted-foreground"
+                >
+                  No results found.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
         </Table>
       </div>
 

@@ -170,7 +170,7 @@ This implementation plan breaks down the personal finance tracker MVP into discr
   - Test filtering for uncategorized and pending transactions
   - _Requirements: 2.1, 2.2, 2.7_
 
-- [ ] 16. Implement analysis and reporting UI
+- [x] 16. Implement analysis and reporting UI
   - Create SpendingByCategory component with chart visualization
   - Create SpendingTrends component with monthly breakdown charts
   - Add DateRangePicker component for analysis period selection
@@ -178,7 +178,7 @@ This implementation plan breaks down the personal finance tracker MVP into discr
   - Implement responsive design for charts and tables
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 6.4_
 
-- [ ] 16.1 Write unit tests for analysis UI components
+- [x] 16.1 Write unit tests for analysis UI components
   - Test chart data calculation and rendering
   - Test date range filtering
   - Test multi-account analysis display

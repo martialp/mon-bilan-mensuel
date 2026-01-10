@@ -371,7 +371,6 @@ test.describe("Transaction CRUD Operations", () => {
   })
 })
 
-
 test.describe("Transaction Categorization UI", () => {
   test.beforeEach(async ({ page }) => {
     // Ensure we have an account to use for transactions
@@ -554,9 +553,7 @@ test.describe("Transaction Categorization UI", () => {
 
     // Bulk actions bar should appear
     await expect(page.getByText(/\d+ selected/)).toBeVisible()
-    await expect(
-      page.getByRole("button", { name: /Categorize/ }),
-    ).toBeVisible()
+    await expect(page.getByRole("button", { name: /Categorize/ })).toBeVisible()
   })
 
   test("Bulk categorization dialog opens and has category selection", async ({
@@ -689,7 +686,9 @@ test.describe("Transaction Categorization UI", () => {
     await page.getByRole("option", { name: "Auto-categorized" }).click()
 
     // Our manual transaction should not be visible
-    await expect(page.getByRole("cell", { name: description })).not.toBeVisible()
+    await expect(
+      page.getByRole("cell", { name: description }),
+    ).not.toBeVisible()
 
     // Clear the filter
     await page.getByRole("button", { name: /Clear filters/i }).click()

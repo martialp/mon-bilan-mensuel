@@ -70,7 +70,6 @@ export const Route = createFileRoute("/_layout/transactions")({
   }),
 })
 
-
 interface TransactionsTableContentProps {
   filters: TransactionFiltersState
   rowSelection: RowSelectionState
@@ -174,7 +173,6 @@ function TransactionsTable({
   )
 }
 
-
 interface QuickFilterButtonProps {
   label: string
   count: number
@@ -244,9 +242,7 @@ function Transactions() {
   }, [allTransactions])
 
   const pendingConfirmationCount = useMemo(() => {
-    return (
-      allTransactions?.data.filter((t) => t.status === "auto").length || 0
-    )
+    return allTransactions?.data.filter((t) => t.status === "auto").length || 0
   }, [allTransactions])
 
   const selectedTransactionIds = useMemo(() => {

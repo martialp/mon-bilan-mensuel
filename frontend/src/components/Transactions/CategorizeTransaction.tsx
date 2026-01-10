@@ -2,7 +2,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Tag } from "lucide-react"
 import { useState } from "react"
 
-import { CategoriesService, type TransactionPublic, TransactionsService } from "@/client"
+import {
+  CategoriesService,
+  type TransactionPublic,
+  TransactionsService,
+} from "@/client"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -37,7 +41,7 @@ export function CategorizeTransaction({
 }: CategorizeTransactionProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>(
-    transaction.category_id || "uncategorized"
+    transaction.category_id || "uncategorized",
   )
   const queryClient = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
@@ -55,15 +59,14 @@ export function CategorizeTransaction({
           id: transaction.id,
           categoryId: categoryId,
         })
-      } else {
-        // For uncategorizing, use the update endpoint
-        return TransactionsService.updateTransaction({
-          id: transaction.id,
-          requestBody: {
-            category_id: null,
-          },
-        })
       }
+      // For uncategorizing, use the update endpoint
+      return TransactionsService.updateTransaction({
+        id: transaction.id,
+        requestBody: {
+          category_id: null,
+        },
+      })
     },
     onSuccess: () => {
       showSuccessToast("Transaction categorized successfully")

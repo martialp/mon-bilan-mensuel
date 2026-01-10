@@ -58,15 +58,14 @@ export function BulkCategorization({
               id,
               categoryId,
             })
-          } else {
-            // For uncategorizing, use the update endpoint
-            return TransactionsService.updateTransaction({
-              id,
-              requestBody: {
-                category_id: null,
-              },
-            })
           }
+          // For uncategorizing, use the update endpoint
+          return TransactionsService.updateTransaction({
+            id,
+            requestBody: {
+              category_id: null,
+            },
+          })
         }),
       )
       return results
@@ -133,7 +132,10 @@ export function BulkCategorization({
         </div>
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="outline" disabled={bulkCategorizeMutation.isPending}>
+            <Button
+              variant="outline"
+              disabled={bulkCategorizeMutation.isPending}
+            >
               Cancel
             </Button>
           </DialogClose>

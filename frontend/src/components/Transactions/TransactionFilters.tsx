@@ -44,8 +44,7 @@ export function TransactionFilters({
   const handleCategoryChange = (value: string) => {
     onFiltersChange({
       ...filters,
-      categoryId:
-        value === "all" ? null : value,
+      categoryId: value === "all" ? null : value,
     })
   }
 

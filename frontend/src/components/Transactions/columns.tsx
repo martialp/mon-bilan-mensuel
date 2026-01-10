@@ -123,7 +123,9 @@ export const createColumns = (
               table.getIsAllPageRowsSelected() ||
               (table.getIsSomePageRowsSelected() && "indeterminate")
             }
-            onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+            onCheckedChange={(value) =>
+              table.toggleAllPageRowsSelected(!!value)
+            }
             aria-label="Select all"
           />
         ) : null,
@@ -224,7 +226,11 @@ export const createColumns = (
           )
         }
         const categoryName = context.categories.get(categoryId)
-        return <span className="text-sm truncate block max-w-[120px]">{categoryName || "Unknown"}</span>
+        return (
+          <span className="text-sm truncate block max-w-[120px]">
+            {categoryName || "Unknown"}
+          </span>
+        )
       },
       size: 120,
       minSize: 120,
@@ -233,7 +239,9 @@ export const createColumns = (
     {
       accessorKey: "status",
       header: "Status",
-      cell: ({ row }) => <TransactionStatusBadge status={row.original.status} />,
+      cell: ({ row }) => (
+        <TransactionStatusBadge status={row.original.status} />
+      ),
       size: 130,
       minSize: 130,
       maxSize: 130,

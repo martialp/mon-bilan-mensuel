@@ -41,15 +41,14 @@ export function CategorySelector({
           id: transactionId,
           categoryId: categoryId,
         })
-      } else {
-        // For uncategorizing, use the update endpoint
-        return TransactionsService.updateTransaction({
-          id: transactionId,
-          requestBody: {
-            category_id: null,
-          },
-        })
       }
+      // For uncategorizing, use the update endpoint
+      return TransactionsService.updateTransaction({
+        id: transactionId,
+        requestBody: {
+          category_id: null,
+        },
+      })
     },
     onSuccess: () => {
       showSuccessToast("Transaction categorized successfully")
