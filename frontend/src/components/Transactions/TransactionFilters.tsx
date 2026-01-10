@@ -1,5 +1,5 @@
 import { X } from "lucide-react"
-import type { AccountPublic, CategoryPublic } from "@/client"
+import type { AccountPublic, CategoryPublic, TransactionStatus } from "@/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -16,6 +16,7 @@ export interface TransactionFiltersState {
   categoryId: string | null
   startDate: string | null
   endDate: string | null
+  status: TransactionStatus | null
 }
 
 interface TransactionFiltersProps {
@@ -48,6 +49,13 @@ export function TransactionFilters({
     })
   }
 
+  const handleStatusChange = (value: string) => {
+    onFiltersChange({
+      ...filters,
+      status: value === "all" ? null : (value as TransactionStatus),
+    })
+  }
+
   const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onFiltersChange({
       ...filters,
@@ -68,6 +76,7 @@ export function TransactionFilters({
       categoryId: null,
       startDate: null,
       endDate: null,
+      status: null,
     })
   }
 
@@ -75,7 +84,8 @@ export function TransactionFilters({
     filters.accountId ||
     filters.categoryId ||
     filters.startDate ||
-    filters.endDate
+    filters.endDate ||
+    filters.status
 
   return (
     <div className="flex flex-col gap-4 p-4 border rounded-lg bg-muted/20">
@@ -94,7 +104,7 @@ export function TransactionFilters({
         )}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="space-y-2">
           <Label htmlFor="account-filter" className="text-xs">
             Account
@@ -136,6 +146,26 @@ export function TransactionFilters({
                   {category.name}
                 </SelectItem>
               ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="status-filter" className="text-xs">
+            Status
+          </Label>
+          <Select
+            value={filters.status || "all"}
+            onValueChange={handleStatusChange}
+          >
+            <SelectTrigger id="status-filter" className="h-9">
+              <SelectValue placeholder="All statuses" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All statuses</SelectItem>
+              <SelectItem value="auto">Auto-categorized</SelectItem>
+              <SelectItem value="confirmed">Confirmed</SelectItem>
+              <SelectItem value="manual">Manual</SelectItem>
             </SelectContent>
           </Select>
         </div>

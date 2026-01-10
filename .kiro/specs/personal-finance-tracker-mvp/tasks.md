@@ -157,14 +157,14 @@ This implementation plan breaks down the personal finance tracker MVP into discr
   - Test filtering functionality
   - _Requirements: 1.1, 1.2, 1.3, 2.6, 6.2_
 
-- [ ] 15. Implement transaction categorization UI
+- [x] 15. Implement transaction categorization UI
   - Create CategorySelector component for manual categorization
   - Add bulk categorization functionality for multiple transactions
   - Implement confirmation workflow for auto-categorized transactions
   - Create dedicated views for uncategorized and pending confirmation transactions
   - _Requirements: 2.1, 2.2, 2.4, 2.5, 2.7_
 
-- [ ] 15.1 Write unit tests for categorization UI
+- [x] 15.1 Write unit tests for categorization UI
   - Test manual categorization workflow
   - Test confirmation workflow
   - Test filtering for uncategorized and pending transactions

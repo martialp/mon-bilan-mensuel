@@ -1,5 +1,6 @@
 import {
   type ColumnDef,
+  type RowSelectionState,
   type VisibilityState,
   flexRender,
   getCoreRowModel,
@@ -34,20 +35,37 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
   initialColumnVisibility?: VisibilityState
+  rowSelection?: RowSelectionState
+  onRowSelectionChange?: (selection: RowSelectionState) => void
+  getRowId?: (row: TData) => string
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   initialColumnVisibility = {},
+  rowSelection,
+  onRowSelectionChange,
+  getRowId,
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    initialState: {
+    onRowSelectionChange: onRowSelectionChange
+      ? (updater) => {
+          const newSelection =
+            typeof updater === "function"
+              ? updater(rowSelection || {})
+              : updater
+          onRowSelectionChange(newSelection)
+        }
+      : undefined,
+    getRowId: getRowId,
+    state: {
       columnVisibility: initialColumnVisibility,
+      rowSelection: rowSelection || {},
     },
   })
 

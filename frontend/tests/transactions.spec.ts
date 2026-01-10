@@ -370,3 +370,275 @@ test.describe("Transaction CRUD Operations", () => {
     ).not.toBeVisible()
   })
 })
+
+
+test.describe("Transaction Categorization UI", () => {
+  test.beforeEach(async ({ page }) => {
+    // Ensure we have an account to use for transactions
+    await page.goto("/accounts")
+
+    // Check if we need to create an account
+    const hasAccounts = await page
+      .getByRole("table")
+      .isVisible()
+      .catch(() => false)
+
+    if (!hasAccounts) {
+      // Create a test account
+      await page.getByRole("button", { name: "Add Account" }).click()
+      await page.getByLabel(/Name/).fill("Categorization Test Account")
+      await page.getByRole("combobox").click()
+      await page.getByRole("option", { name: "Chequing" }).click()
+      await page.getByRole("button", { name: "Save" }).click()
+      await expect(page.getByText("Account created successfully")).toBeVisible()
+    }
+
+    await page.goto("/transactions")
+  })
+
+  test("Quick filter buttons are visible", async ({ page }) => {
+    // Quick filter buttons should be visible
+    await expect(page.getByText("Quick filters:")).toBeVisible()
+    await expect(
+      page.getByRole("button", { name: /Uncategorized/ }),
+    ).toBeVisible()
+    await expect(
+      page.getByRole("button", { name: /Pending Confirmation/ }),
+    ).toBeVisible()
+  })
+
+  test("Select Multiple button toggles selection mode", async ({ page }) => {
+    // Select Multiple button should be visible
+    const selectButton = page.getByRole("button", { name: "Select Multiple" })
+    await expect(selectButton).toBeVisible()
+
+    // Click to enable selection mode
+    await selectButton.click()
+
+    // Button should change to Cancel Selection
+    await expect(
+      page.getByRole("button", { name: "Cancel Selection" }),
+    ).toBeVisible()
+
+    // Click again to disable selection mode
+    await page.getByRole("button", { name: "Cancel Selection" }).click()
+
+    // Button should change back to Select Multiple
+    await expect(
+      page.getByRole("button", { name: "Select Multiple" }),
+    ).toBeVisible()
+  })
+
+  test("Status filter is visible and has correct options", async ({ page }) => {
+    // Click on status filter
+    const statusFilter = page.getByLabel("Status")
+    await expect(statusFilter).toBeVisible()
+    await statusFilter.click()
+
+    // Should show all status options
+    await expect(
+      page.getByRole("option", { name: "All statuses" }),
+    ).toBeVisible()
+    await expect(
+      page.getByRole("option", { name: "Auto-categorized" }),
+    ).toBeVisible()
+    await expect(page.getByRole("option", { name: "Confirmed" })).toBeVisible()
+    await expect(page.getByRole("option", { name: "Manual" })).toBeVisible()
+  })
+
+  test("Quick filter for uncategorized transactions works", async ({
+    page,
+  }) => {
+    // Click on Uncategorized quick filter
+    await page.getByRole("button", { name: /Uncategorized/ }).click()
+
+    // Category filter should be set to Uncategorized
+    const categoryFilter = page.getByLabel("Category")
+    await expect(categoryFilter).toContainText("Uncategorized")
+  })
+
+  test("Quick filter for pending confirmation transactions works", async ({
+    page,
+  }) => {
+    // Click on Pending Confirmation quick filter
+    await page.getByRole("button", { name: /Pending Confirmation/ }).click()
+
+    // Status filter should be set to Auto-categorized
+    const statusFilter = page.getByLabel("Status")
+    await expect(statusFilter).toContainText("Auto-categorized")
+  })
+
+  test("Manual categorization via edit transaction dialog", async ({
+    page,
+  }) => {
+    // First create an uncategorized transaction
+    const description = `Categorization Test ${Date.now()}`
+
+    await page.getByRole("button", { name: "Add Transaction" }).click()
+
+    const dialog = page.getByRole("dialog")
+    await dialog.getByRole("combobox", { name: /Type/ }).click()
+    await page.getByRole("option", { name: "Expense" }).click()
+    await dialog.getByRole("textbox", { name: /Description/ }).fill(description)
+    await dialog.getByRole("spinbutton", { name: /Amount/ }).fill("75.00")
+    await dialog.getByRole("combobox", { name: /Account/ }).click()
+    await page.getByRole("option").first().click()
+    // Don't select a category - leave it uncategorized
+    await page.getByRole("button", { name: "Save" }).click()
+
+    // Wait for success
+    await expect(
+      page.getByText("Transaction created successfully"),
+    ).toBeVisible()
+    await expect(page.getByRole("dialog")).not.toBeVisible()
+
+    // Wait for the transaction to appear in the table
+    await expect(page.getByRole("cell", { name: description })).toBeVisible()
+
+    // Find the transaction row and click the actions menu
+    const transactionRow = page
+      .getByRole("row")
+      .filter({ hasText: description })
+    await transactionRow.getByRole("button").last().click()
+
+    // Click Edit Transaction
+    await page.getByRole("menuitem", { name: "Edit Transaction" }).click()
+
+    // Verify the edit dialog opens
+    await expect(page.getByRole("dialog")).toBeVisible()
+    await expect(
+      page.getByRole("heading", { name: "Edit Transaction" }),
+    ).toBeVisible()
+
+    // Verify the category dropdown is available
+    await expect(
+      page.getByRole("dialog").getByRole("combobox", { name: "Category" }),
+    ).toBeVisible()
+
+    // Close the dialog
+    await page.getByRole("button", { name: "Cancel" }).click()
+    await expect(page.getByRole("dialog")).not.toBeVisible()
+  })
+
+  test("Bulk categorization button appears when transactions are selected", async ({
+    page,
+  }) => {
+    // First create a transaction
+    const description = `Bulk Test ${Date.now()}`
+
+    await page.getByRole("button", { name: "Add Transaction" }).click()
+
+    const dialog = page.getByRole("dialog")
+    await dialog.getByRole("combobox", { name: /Type/ }).click()
+    await page.getByRole("option", { name: "Expense" }).click()
+    await dialog.getByRole("textbox", { name: /Description/ }).fill(description)
+    await dialog.getByRole("spinbutton", { name: /Amount/ }).fill("30.00")
+    await dialog.getByRole("combobox", { name: /Account/ }).click()
+    await page.getByRole("option").first().click()
+    await page.getByRole("button", { name: "Save" }).click()
+
+    // Wait for success
+    await expect(
+      page.getByText("Transaction created successfully"),
+    ).toBeVisible()
+    await expect(page.getByRole("dialog")).not.toBeVisible()
+
+    // Enable selection mode
+    await page.getByRole("button", { name: "Select Multiple" }).click()
+
+    // Wait for the table to have checkboxes
+    await expect(page.getByRole("checkbox").first()).toBeVisible()
+
+    // Select the first transaction
+    await page.getByRole("checkbox").first().click()
+
+    // Bulk actions bar should appear
+    await expect(page.getByText(/\d+ selected/)).toBeVisible()
+    await expect(
+      page.getByRole("button", { name: /Categorize/ }),
+    ).toBeVisible()
+  })
+
+  test("Bulk categorization dialog opens and has category selection", async ({
+    page,
+  }) => {
+    // First create a transaction
+    const description = `Bulk Dialog Test ${Date.now()}`
+
+    await page.getByRole("button", { name: "Add Transaction" }).click()
+
+    const dialog = page.getByRole("dialog")
+    await dialog.getByRole("combobox", { name: /Type/ }).click()
+    await page.getByRole("option", { name: "Expense" }).click()
+    await dialog.getByRole("textbox", { name: /Description/ }).fill(description)
+    await dialog.getByRole("spinbutton", { name: /Amount/ }).fill("45.00")
+    await dialog.getByRole("combobox", { name: /Account/ }).click()
+    await page.getByRole("option").first().click()
+    await page.getByRole("button", { name: "Save" }).click()
+
+    // Wait for success
+    await expect(
+      page.getByText("Transaction created successfully"),
+    ).toBeVisible()
+    await expect(page.getByRole("dialog")).not.toBeVisible()
+
+    // Enable selection mode
+    await page.getByRole("button", { name: "Select Multiple" }).click()
+
+    // Select the first transaction
+    await page.getByRole("checkbox").first().click()
+
+    // Click the Categorize button
+    await page.getByRole("button", { name: /Categorize/ }).click()
+
+    // Bulk categorization dialog should open
+    await expect(page.getByRole("dialog")).toBeVisible()
+    await expect(
+      page.getByRole("heading", { name: "Bulk Categorization" }),
+    ).toBeVisible()
+
+    // Category dropdown should be visible
+    await expect(page.getByRole("combobox")).toBeVisible()
+
+    // Cancel button should close the dialog
+    await page.getByRole("button", { name: "Cancel" }).click()
+    await expect(page.getByRole("dialog")).not.toBeVisible()
+  })
+
+  test("Clear selection button works", async ({ page }) => {
+    // First create a transaction
+    const description = `Clear Selection Test ${Date.now()}`
+
+    await page.getByRole("button", { name: "Add Transaction" }).click()
+
+    const dialog = page.getByRole("dialog")
+    await dialog.getByRole("combobox", { name: /Type/ }).click()
+    await page.getByRole("option", { name: "Expense" }).click()
+    await dialog.getByRole("textbox", { name: /Description/ }).fill(description)
+    await dialog.getByRole("spinbutton", { name: /Amount/ }).fill("20.00")
+    await dialog.getByRole("combobox", { name: /Account/ }).click()
+    await page.getByRole("option").first().click()
+    await page.getByRole("button", { name: "Save" }).click()
+
+    // Wait for success
+    await expect(
+      page.getByText("Transaction created successfully"),
+    ).toBeVisible()
+    await expect(page.getByRole("dialog")).not.toBeVisible()
+
+    // Enable selection mode
+    await page.getByRole("button", { name: "Select Multiple" }).click()
+
+    // Select the first transaction
+    await page.getByRole("checkbox").first().click()
+
+    // Bulk actions bar should appear
+    await expect(page.getByText(/\d+ selected/)).toBeVisible()
+
+    // Click clear selection
+    await page.getByRole("button", { name: "Clear selection" }).click()
+
+    // Bulk actions bar should disappear
+    await expect(page.getByText(/\d+ selected/)).not.toBeVisible()
+  })
+})

@@ -14,6 +14,7 @@ import type {
 } from "@/client"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard"
 import {
   formatCurrency,
@@ -105,96 +106,129 @@ function AmountCell({
 export interface TransactionColumnContext {
   accounts: Map<string, string>
   categories: Map<string, string>
+  enableSelection?: boolean
 }
 
 export const createColumns = (
   context: TransactionColumnContext,
-): ColumnDef<TransactionPublic>[] => [
-  {
-    accessorKey: "id",
-    header: "ID",
-    cell: ({ row }) => <CopyId id={row.original.id} />,
-  },
-  {
-    accessorKey: "date_transaction",
-    header: "Date",
-    cell: ({ row }) => (
-      <span className="text-sm">
-        {formatDate(row.original.date_transaction)}
-      </span>
-    ),
-  },
-  {
-    accessorKey: "description",
-    header: "Description",
-    cell: ({ row }) => (
-      <span
-        className="max-w-[200px] truncate block font-medium"
-        title={row.original.description}
-      >
-        {row.original.description}
-      </span>
-    ),
-  },
-  {
-    accessorKey: "amount_cents",
-    header: "Amount",
-    cell: ({ row }) => (
-      <AmountCell
-        amount_cents={row.original.amount_cents}
-        type={row.original.type}
-      />
-    ),
-  },
-  {
-    accessorKey: "type",
-    header: "Type",
-    cell: ({ row }) => <TransactionTypeCell type={row.original.type} />,
-  },
-  {
-    accessorKey: "account_id",
-    header: "Account",
-    cell: ({ row }) => {
-      const accountName = context.accounts.get(row.original.account_id)
-      return (
-        <span className="text-sm text-muted-foreground">
-          {accountName || "Unknown"}
-        </span>
-      )
+): ColumnDef<TransactionPublic>[] => {
+  const columns: ColumnDef<TransactionPublic>[] = []
+
+  // Add selection column if enabled
+  if (context.enableSelection) {
+    columns.push({
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && "indeterminate")
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    })
+  }
+
+  columns.push(
+    {
+      accessorKey: "id",
+      header: "ID",
+      cell: ({ row }) => <CopyId id={row.original.id} />,
     },
-  },
-  {
-    accessorKey: "category_id",
-    header: "Category",
-    cell: ({ row }) => {
-      const categoryId = row.original.category_id
-      if (!categoryId) {
+    {
+      accessorKey: "date_transaction",
+      header: "Date",
+      cell: ({ row }) => (
+        <span className="text-sm">
+          {formatDate(row.original.date_transaction)}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "description",
+      header: "Description",
+      cell: ({ row }) => (
+        <span
+          className="max-w-[200px] truncate block font-medium"
+          title={row.original.description}
+        >
+          {row.original.description}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "amount_cents",
+      header: "Amount",
+      cell: ({ row }) => (
+        <AmountCell
+          amount_cents={row.original.amount_cents}
+          type={row.original.type}
+        />
+      ),
+    },
+    {
+      accessorKey: "type",
+      header: "Type",
+      cell: ({ row }) => <TransactionTypeCell type={row.original.type} />,
+    },
+    {
+      accessorKey: "account_id",
+      header: "Account",
+      cell: ({ row }) => {
+        const accountName = context.accounts.get(row.original.account_id)
         return (
-          <span className="text-sm text-muted-foreground italic">
-            Uncategorized
+          <span className="text-sm text-muted-foreground">
+            {accountName || "Unknown"}
           </span>
         )
-      }
-      const categoryName = context.categories.get(categoryId)
-      return <span className="text-sm">{categoryName || "Unknown"}</span>
+      },
     },
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => <TransactionStatusBadge status={row.original.status} />,
-  },
-  {
-    id: "actions",
-    header: () => <span className="sr-only">Actions</span>,
-    cell: ({ row }) => (
-      <div className="flex justify-end">
-        <TransactionActionsMenu
-          transaction={row.original}
-          accounts={context.accounts}
-          categories={context.categories}
-        />
-      </div>
-    ),
-  },
-]
+    {
+      accessorKey: "category_id",
+      header: "Category",
+      cell: ({ row }) => {
+        const categoryId = row.original.category_id
+        if (!categoryId) {
+          return (
+            <span className="text-sm text-muted-foreground italic">
+              Uncategorized
+            </span>
+          )
+        }
+        const categoryName = context.categories.get(categoryId)
+        return <span className="text-sm">{categoryName || "Unknown"}</span>
+      },
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => <TransactionStatusBadge status={row.original.status} />,
+    },
+    {
+      id: "actions",
+      header: () => <span className="sr-only">Actions</span>,
+      cell: ({ row }) => (
+        <div className="flex justify-end">
+          <TransactionActionsMenu
+            transaction={row.original}
+            accounts={context.accounts}
+            categories={context.categories}
+          />
+        </div>
+      ),
+    },
+  )
+
+  return columns
+}
