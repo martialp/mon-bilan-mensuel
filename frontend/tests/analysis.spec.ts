@@ -184,7 +184,7 @@ test.describe("Financial Analysis", () => {
   test("Filtering by account updates the analysis", async ({ page }) => {
     // Wait for the page to load
     await page.waitForTimeout(500)
-    
+
     // Click on the account selector
     const accountSelector = page.getByRole("combobox").nth(1)
     await accountSelector.click()
