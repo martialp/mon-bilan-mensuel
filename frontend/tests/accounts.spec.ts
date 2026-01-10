@@ -10,9 +10,7 @@ test.describe("Account Management", () => {
 
   test("Accounts page is accessible and displays header", async ({ page }) => {
     await expect(page.getByRole("heading", { name: "Accounts" })).toBeVisible()
-    await expect(
-      page.getByText("Manage your financial accounts"),
-    ).toBeVisible()
+    await expect(page.getByText("Manage your financial accounts")).toBeVisible()
   })
 
   test("Add Account button is visible", async ({ page }) => {
@@ -62,7 +60,9 @@ test.describe("Account Management", () => {
     await page.getByRole("combobox").click()
 
     // Verify all account types are available
-    await expect(page.getByRole("option", { name: "Credit Card" })).toBeVisible()
+    await expect(
+      page.getByRole("option", { name: "Credit Card" }),
+    ).toBeVisible()
     await expect(page.getByRole("option", { name: "Chequing" })).toBeVisible()
     await expect(page.getByRole("option", { name: "Savings" })).toBeVisible()
     await expect(page.getByRole("option", { name: "Investment" })).toBeVisible()

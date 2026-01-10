@@ -16,6 +16,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as LayoutRouteImport } from './routes/_layout'
 import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
 import { Route as LayoutSettingsRouteImport } from './routes/_layout/settings'
+import { Route as LayoutCategoriesRouteImport } from './routes/_layout/categories'
 import { Route as LayoutAdminRouteImport } from './routes/_layout/admin'
 import { Route as LayoutAccountsRouteImport } from './routes/_layout/accounts'
 
@@ -53,6 +54,11 @@ const LayoutSettingsRoute = LayoutSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutCategoriesRoute = LayoutCategoriesRouteImport.update({
+  id: '/categories',
+  path: '/categories',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const LayoutAdminRoute = LayoutAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -71,6 +77,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/accounts': typeof LayoutAccountsRoute
   '/admin': typeof LayoutAdminRoute
+  '/categories': typeof LayoutCategoriesRoute
   '/settings': typeof LayoutSettingsRoute
   '/': typeof LayoutIndexRoute
 }
@@ -81,6 +88,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/accounts': typeof LayoutAccountsRoute
   '/admin': typeof LayoutAdminRoute
+  '/categories': typeof LayoutCategoriesRoute
   '/settings': typeof LayoutSettingsRoute
   '/': typeof LayoutIndexRoute
 }
@@ -93,6 +101,7 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/_layout/accounts': typeof LayoutAccountsRoute
   '/_layout/admin': typeof LayoutAdminRoute
+  '/_layout/categories': typeof LayoutCategoriesRoute
   '/_layout/settings': typeof LayoutSettingsRoute
   '/_layout/': typeof LayoutIndexRoute
 }
@@ -105,6 +114,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/accounts'
     | '/admin'
+    | '/categories'
     | '/settings'
     | '/'
   fileRoutesByTo: FileRoutesByTo
@@ -115,6 +125,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/accounts'
     | '/admin'
+    | '/categories'
     | '/settings'
     | '/'
   id:
@@ -126,6 +137,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/_layout/accounts'
     | '/_layout/admin'
+    | '/_layout/categories'
     | '/_layout/settings'
     | '/_layout/'
   fileRoutesById: FileRoutesById
@@ -189,6 +201,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutSettingsRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/categories': {
+      id: '/_layout/categories'
+      path: '/categories'
+      fullPath: '/categories'
+      preLoaderRoute: typeof LayoutCategoriesRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/_layout/admin': {
       id: '/_layout/admin'
       path: '/admin'
@@ -209,6 +228,7 @@ declare module '@tanstack/react-router' {
 interface LayoutRouteChildren {
   LayoutAccountsRoute: typeof LayoutAccountsRoute
   LayoutAdminRoute: typeof LayoutAdminRoute
+  LayoutCategoriesRoute: typeof LayoutCategoriesRoute
   LayoutSettingsRoute: typeof LayoutSettingsRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
 }
@@ -216,6 +236,7 @@ interface LayoutRouteChildren {
 const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutAccountsRoute: LayoutAccountsRoute,
   LayoutAdminRoute: LayoutAdminRoute,
+  LayoutCategoriesRoute: LayoutCategoriesRoute,
   LayoutSettingsRoute: LayoutSettingsRoute,
   LayoutIndexRoute: LayoutIndexRoute,
 }

@@ -94,7 +94,7 @@ export function formatDate(
   dateString: string,
   locale: string = "en-CA",
 ): string {
-  const date = new Date(dateString + "T00:00:00")
+  const date = new Date(`${dateString}T00:00:00`)
   return new Intl.DateTimeFormat(locale, {
     year: "numeric",
     month: "short",
@@ -112,7 +112,7 @@ export function formatDateLong(
   dateString: string,
   locale: string = "en-CA",
 ): string {
-  const date = new Date(dateString + "T00:00:00")
+  const date = new Date(`${dateString}T00:00:00`)
   return new Intl.DateTimeFormat(locale, {
     year: "numeric",
     month: "long",
@@ -293,7 +293,8 @@ export function getTransactionStatusBadgeClass(
 ): string {
   const classes: Record<string, string> = {
     auto: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
-    confirmed: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
+    confirmed:
+      "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
     manual: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
   }
   return classes[status] || ""

@@ -131,14 +131,14 @@ This implementation plan breaks down the personal finance tracker MVP into discr
   - Test account list rendering and interactions
   - _Requirements: 3.1, 3.2, 6.2_
 
-- [ ] 13. Implement category management UI
+- [x] 13. Implement category management UI
   - Create CategoryList component to display all categories
   - Create CategoryForm component for creating/editing categories
   - Add category uniqueness validation feedback
   - Implement category deletion with confirmation dialog
   - _Requirements: 2.3, 6.1, 6.2_
 
-- [ ] 13.1 Write unit tests for category UI components
+- [x] 13.1 Write unit tests for category UI components
   - Test category form validation and submission
   - Test category list rendering and interactions
   - _Requirements: 2.3, 6.2_

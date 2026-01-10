@@ -1,5 +1,13 @@
 import type { ColumnDef } from "@tanstack/react-table"
-import { Check, Copy, CreditCard, Landmark, PiggyBank, TrendingUp, HelpCircle } from "lucide-react"
+import {
+  Check,
+  Copy,
+  CreditCard,
+  HelpCircle,
+  Landmark,
+  PiggyBank,
+  TrendingUp,
+} from "lucide-react"
 
 import type { AccountPublic, AccountType } from "@/client"
 import { Button } from "@/components/ui/button"
@@ -31,7 +39,10 @@ function CopyId({ id }: { id: string }) {
   )
 }
 
-const accountTypeConfig: Record<AccountType, { label: string; icon: React.ComponentType<{ className?: string }> }> = {
+const accountTypeConfig: Record<
+  AccountType,
+  { label: string; icon: React.ComponentType<{ className?: string }> }
+> = {
   credit_card: { label: "Credit Card", icon: CreditCard },
   chequing: { label: "Chequing", icon: Landmark },
   savings: { label: "Savings", icon: PiggyBank },
@@ -60,9 +71,7 @@ export const columns: ColumnDef<AccountPublic>[] = [
   {
     accessorKey: "name",
     header: "Name",
-    cell: ({ row }) => (
-      <span className="font-medium">{row.original.name}</span>
-    ),
+    cell: ({ row }) => <span className="font-medium">{row.original.name}</span>,
   },
   {
     accessorKey: "type",
@@ -75,12 +84,7 @@ export const columns: ColumnDef<AccountPublic>[] = [
     cell: ({ row }) => {
       const institution = row.original.institution
       return (
-        <span
-          className={cn(
-            "text-muted-foreground",
-            !institution && "italic",
-          )}
-        >
+        <span className={cn("text-muted-foreground", !institution && "italic")}>
           {institution || "Not specified"}
         </span>
       )
