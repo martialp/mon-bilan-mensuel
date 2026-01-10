@@ -143,7 +143,7 @@ This implementation plan breaks down the personal finance tracker MVP into discr
   - Test category list rendering and interactions
   - _Requirements: 2.3, 6.2_
 
-- [ ] 14. Implement transaction management UI
+- [x] 14. Implement transaction management UI
   - Create TransactionList component with filtering capabilities
   - Create TransactionForm component for creating/editing transactions
   - Add currency input formatting and validation
@@ -151,7 +151,7 @@ This implementation plan breaks down the personal finance tracker MVP into discr
   - Add visual indicators for transaction status (auto, confirmed, manual)
   - _Requirements: 1.1, 1.2, 1.3, 2.1, 2.6, 6.1, 6.2, 6.3_
 
-- [ ] 14.1 Write unit tests for transaction UI components
+- [x] 14.1 Write unit tests for transaction UI components
   - Test transaction form validation and submission
   - Test transaction list rendering with status indicators
   - Test filtering functionality

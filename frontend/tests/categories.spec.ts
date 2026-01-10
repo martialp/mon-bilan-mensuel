@@ -8,8 +8,12 @@ test.describe("Category Management", () => {
     await page.goto("/categories")
   })
 
-  test("Categories page is accessible and displays header", async ({ page }) => {
-    await expect(page.getByRole("heading", { name: "Categories" })).toBeVisible()
+  test("Categories page is accessible and displays header", async ({
+    page,
+  }) => {
+    await expect(
+      page.getByRole("heading", { name: "Categories" }),
+    ).toBeVisible()
     await expect(
       page.getByText("Manage your transaction categories"),
     ).toBeVisible()
@@ -21,7 +25,9 @@ test.describe("Category Management", () => {
     ).toBeVisible()
   })
 
-  test("Add Category dialog opens and has required fields", async ({ page }) => {
+  test("Add Category dialog opens and has required fields", async ({
+    page,
+  }) => {
     await page.getByRole("button", { name: "Add Category" }).click()
 
     // Dialog should be visible
@@ -173,8 +179,6 @@ test.describe("Category Management", () => {
     await page.getByRole("button", { name: "Save" }).click()
 
     // Should show error about duplicate name
-    await expect(
-      page.getByText(/already exists/i),
-    ).toBeVisible()
+    await expect(page.getByText(/already exists/i)).toBeVisible()
   })
 })
