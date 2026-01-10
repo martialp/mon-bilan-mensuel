@@ -641,4 +641,63 @@ test.describe("Transaction Categorization UI", () => {
     // Bulk actions bar should disappear
     await expect(page.getByText(/\d+ selected/)).not.toBeVisible()
   })
+
+  test("Filter by status works", async ({ page }) => {
+    // First create a transaction (will have "manual" status by default)
+    const description = `Status Filter Test ${Date.now()}`
+
+    await page.getByRole("button", { name: "Add Transaction" }).click()
+
+    const dialog = page.getByRole("dialog")
+    await dialog.getByRole("combobox", { name: /Type/ }).click()
+    await page.getByRole("option", { name: "Expense" }).click()
+    await dialog.getByRole("textbox", { name: /Description/ }).fill(description)
+    await dialog.getByRole("spinbutton", { name: /Amount/ }).fill("55.00")
+    await dialog.getByRole("combobox", { name: /Account/ }).click()
+    await page.getByRole("option").first().click()
+    await page.getByRole("button", { name: "Save" }).click()
+
+    // Wait for success
+    await expect(
+      page.getByText("Transaction created successfully"),
+    ).toBeVisible()
+    await expect(page.getByRole("dialog")).not.toBeVisible()
+
+    // Wait for the transaction to appear
+    await expect(page.getByRole("cell", { name: description })).toBeVisible()
+
+    // Click on status filter
+    const statusFilter = page.getByLabel("Status")
+    await statusFilter.click()
+
+    // Select "Manual" status (our created transaction should have this status)
+    await page.getByRole("option", { name: "Manual" }).click()
+
+    // Status filter should show "Manual"
+    await expect(statusFilter).toContainText("Manual")
+
+    // Clear filters button should appear
+    await expect(
+      page.getByRole("button", { name: /Clear filters/i }),
+    ).toBeVisible()
+
+    // Our transaction should still be visible (it has manual status)
+    await expect(page.getByRole("cell", { name: description })).toBeVisible()
+
+    // Now filter by "Auto-categorized" - our manual transaction should disappear
+    await statusFilter.click()
+    await page.getByRole("option", { name: "Auto-categorized" }).click()
+
+    // Our manual transaction should not be visible
+    await expect(page.getByRole("cell", { name: description })).not.toBeVisible()
+
+    // Clear the filter
+    await page.getByRole("button", { name: /Clear filters/i }).click()
+
+    // Status filter should be reset
+    await expect(statusFilter).toContainText("All statuses")
+
+    // Our transaction should be visible again
+    await expect(page.getByRole("cell", { name: description })).toBeVisible()
+  })
 })
