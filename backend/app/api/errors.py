@@ -96,6 +96,7 @@ def is_duplicate_key_error(error: Exception) -> bool:
     error_str = str(error).lower()
     return (
         "unique_transaction" in error_str or
+        "ix_unique_transaction" in error_str or
         "duplicate key" in error_str or
         "unique constraint" in error_str or
         "uniqueviolation" in error_str
