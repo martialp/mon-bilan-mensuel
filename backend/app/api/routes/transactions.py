@@ -7,6 +7,14 @@ from sqlmodel import func, select, and_, or_
 from sqlalchemy.exc import IntegrityError
 
 from app.api.deps import SessionDep
+from app.api.errors import (
+    raise_not_found,
+    raise_duplicate_transaction,
+    raise_invalid_status_transition,
+    raise_database_error,
+    is_duplicate_key_error,
+    ErrorMessages,
+)
 from app.models import (
     Transaction, TransactionCreate, TransactionPublic, TransactionsPublic, 
     TransactionUpdate, Message, Account, Category, TransactionStatus
@@ -114,7 +122,7 @@ def read_transaction(session: SessionDep, id: uuid.UUID) -> Any:
     """
     transaction = session.get(Transaction, id)
     if not transaction:
-        raise HTTPException(status_code=404, detail="Transaction not found")
+        raise_not_found("transaction")
     return transaction
 
 
@@ -128,13 +136,13 @@ def create_transaction(
     # Verify that the account exists
     account = session.get(Account, transaction_in.account_id)
     if not account:
-        raise HTTPException(status_code=400, detail="Account not found")
+        raise HTTPException(status_code=400, detail=ErrorMessages.ACCOUNT_NOT_FOUND)
     
     # Verify that the category exists if provided
     if transaction_in.category_id:
         category = session.get(Category, transaction_in.category_id)
         if not category:
-            raise HTTPException(status_code=400, detail="Category not found")
+            raise HTTPException(status_code=400, detail=ErrorMessages.CATEGORY_NOT_FOUND)
     
     try:
         transaction = Transaction.model_validate(transaction_in)
@@ -144,12 +152,9 @@ def create_transaction(
         return transaction
     except IntegrityError as e:
         session.rollback()
-        if "unique_transaction" in str(e).lower() or "duplicate key" in str(e).lower():
-            raise HTTPException(
-                status_code=409,
-                detail="A transaction with the same account, date, description, amount, and statement date already exists"
-            )
-        raise HTTPException(status_code=400, detail="Database error occurred")
+        if is_duplicate_key_error(e):
+            raise_duplicate_transaction()
+        raise_database_error("Failed to create transaction. Please check your input and try again.")
 
 
 @router.put("/{id}", response_model=TransactionPublic)
@@ -164,13 +169,13 @@ def update_transaction(
     """
     transaction = session.get(Transaction, id)
     if not transaction:
-        raise HTTPException(status_code=404, detail="Transaction not found")
+        raise_not_found("transaction")
     
     # Verify that the category exists if provided
     if transaction_in.category_id:
         category = session.get(Category, transaction_in.category_id)
         if not category:
-            raise HTTPException(status_code=400, detail="Category not found")
+            raise HTTPException(status_code=400, detail=ErrorMessages.CATEGORY_NOT_FOUND)
     
     try:
         update_dict = transaction_in.model_dump(exclude_unset=True)
@@ -181,12 +186,9 @@ def update_transaction(
         return transaction
     except IntegrityError as e:
         session.rollback()
-        if "unique_transaction" in str(e).lower() or "duplicate key" in str(e).lower():
-            raise HTTPException(
-                status_code=409,
-                detail="A transaction with the same account, date, description, amount, and statement date already exists"
-            )
-        raise HTTPException(status_code=400, detail="Database error occurred")
+        if is_duplicate_key_error(e):
+            raise_duplicate_transaction()
+        raise_database_error("Failed to update transaction. Please check your input and try again.")
 
 
 @router.put("/{id}/categorize", response_model=TransactionPublic)
@@ -201,12 +203,12 @@ def categorize_transaction(
     """
     transaction = session.get(Transaction, id)
     if not transaction:
-        raise HTTPException(status_code=404, detail="Transaction not found")
+        raise_not_found("transaction")
     
     # Verify that the category exists
     category = session.get(Category, category_id)
     if not category:
-        raise HTTPException(status_code=400, detail="Category not found")
+        raise HTTPException(status_code=400, detail=ErrorMessages.CATEGORY_NOT_FOUND)
     
     # Update the transaction with manual categorization
     transaction.category_id = category_id
@@ -229,13 +231,10 @@ def confirm_transaction(
     """
     transaction = session.get(Transaction, id)
     if not transaction:
-        raise HTTPException(status_code=404, detail="Transaction not found")
+        raise_not_found("transaction")
     
     if transaction.status != TransactionStatus.AUTO:
-        raise HTTPException(
-            status_code=400, 
-            detail="Only auto-categorized transactions can be confirmed"
-        )
+        raise_invalid_status_transition(transaction.status.value)
     
     # Update the status to confirmed
     transaction.status = TransactionStatus.CONFIRMED
@@ -255,7 +254,7 @@ def delete_transaction(
     """
     transaction = session.get(Transaction, id)
     if not transaction:
-        raise HTTPException(status_code=404, detail="Transaction not found")
+        raise_not_found("transaction")
     
     session.delete(transaction)
     session.commit()

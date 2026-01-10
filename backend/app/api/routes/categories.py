@@ -6,6 +6,13 @@ from sqlmodel import func, select
 from sqlalchemy.exc import IntegrityError
 
 from app.api.deps import SessionDep
+from app.api.errors import (
+    raise_not_found,
+    raise_duplicate_category,
+    raise_referential_integrity_error,
+    raise_database_error,
+    is_duplicate_key_error,
+)
 from app.models import Category, CategoryCreate, CategoryPublic, CategoriesPublic, CategoryUpdate, Message, Transaction
 
 router = APIRouter(prefix="/categories", tags=["categories"])
@@ -32,7 +39,7 @@ def read_category(session: SessionDep, id: uuid.UUID) -> Any:
     """
     category = session.get(Category, id)
     if not category:
-        raise HTTPException(status_code=404, detail="Category not found")
+        raise_not_found("category")
     return category
 
 
@@ -51,12 +58,9 @@ def create_category(
         return category
     except IntegrityError as e:
         session.rollback()
-        if "unique constraint" in str(e).lower() or "duplicate key" in str(e).lower():
-            raise HTTPException(
-                status_code=400, 
-                detail=f"Category with name '{category_in.name}' already exists"
-            )
-        raise HTTPException(status_code=400, detail="Database error occurred")
+        if is_duplicate_key_error(e):
+            raise_duplicate_category(category_in.name)
+        raise_database_error("Failed to create category. Please check your input and try again.")
 
 
 @router.put("/{id}", response_model=CategoryPublic)
@@ -71,7 +75,7 @@ def update_category(
     """
     category = session.get(Category, id)
     if not category:
-        raise HTTPException(status_code=404, detail="Category not found")
+        raise_not_found("category")
     
     try:
         update_dict = category_in.model_dump(exclude_unset=True)
@@ -82,12 +86,9 @@ def update_category(
         return category
     except IntegrityError as e:
         session.rollback()
-        if "unique constraint" in str(e).lower() or "duplicate key" in str(e).lower():
-            raise HTTPException(
-                status_code=400, 
-                detail=f"Category with name '{category_in.name}' already exists"
-            )
-        raise HTTPException(status_code=400, detail="Database error occurred")
+        if is_duplicate_key_error(e):
+            raise_duplicate_category(category_in.name or "")
+        raise_database_error("Failed to update category. Please check your input and try again.")
 
 
 @router.delete("/{id}")
@@ -99,16 +100,13 @@ def delete_category(
     """
     category = session.get(Category, id)
     if not category:
-        raise HTTPException(status_code=404, detail="Category not found")
+        raise_not_found("category")
     
     # Check if category has transactions - implement referential integrity protection
     statement = select(Transaction).where(Transaction.category_id == id)
     existing_transaction = session.exec(statement).first()
     if existing_transaction:
-        raise HTTPException(
-            status_code=400, 
-            detail="Cannot delete category with existing transactions"
-        )
+        raise_referential_integrity_error("category")
     
     session.delete(category)
     session.commit()

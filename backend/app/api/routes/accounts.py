@@ -3,8 +3,15 @@ from typing import Any
 
 from fastapi import APIRouter, HTTPException
 from sqlmodel import func, select
+from sqlalchemy.exc import IntegrityError
 
 from app.api.deps import SessionDep
+from app.api.errors import (
+    raise_not_found,
+    raise_referential_integrity_error,
+    raise_database_error,
+    is_duplicate_key_error,
+)
 from app.models import Account, AccountCreate, AccountPublic, AccountsPublic, AccountUpdate, Message, Transaction
 
 router = APIRouter(prefix="/accounts", tags=["accounts"])
@@ -31,7 +38,7 @@ def read_account(session: SessionDep, id: uuid.UUID) -> Any:
     """
     account = session.get(Account, id)
     if not account:
-        raise HTTPException(status_code=404, detail="Account not found")
+        raise_not_found("account")
     return account
 
 
@@ -42,11 +49,15 @@ def create_account(
     """
     Create new account.
     """
-    account = Account.model_validate(account_in)
-    session.add(account)
-    session.commit()
-    session.refresh(account)
-    return account
+    try:
+        account = Account.model_validate(account_in)
+        session.add(account)
+        session.commit()
+        session.refresh(account)
+        return account
+    except IntegrityError as e:
+        session.rollback()
+        raise_database_error("Failed to create account. Please check your input and try again.")
 
 
 @router.put("/{id}", response_model=AccountPublic)
@@ -61,13 +72,17 @@ def update_account(
     """
     account = session.get(Account, id)
     if not account:
-        raise HTTPException(status_code=404, detail="Account not found")
-    update_dict = account_in.model_dump(exclude_unset=True)
-    account.sqlmodel_update(update_dict)
-    session.add(account)
-    session.commit()
-    session.refresh(account)
-    return account
+        raise_not_found("account")
+    try:
+        update_dict = account_in.model_dump(exclude_unset=True)
+        account.sqlmodel_update(update_dict)
+        session.add(account)
+        session.commit()
+        session.refresh(account)
+        return account
+    except IntegrityError as e:
+        session.rollback()
+        raise_database_error("Failed to update account. Please check your input and try again.")
 
 
 @router.delete("/{id}")
@@ -79,16 +94,13 @@ def delete_account(
     """
     account = session.get(Account, id)
     if not account:
-        raise HTTPException(status_code=404, detail="Account not found")
+        raise_not_found("account")
     
     # Check if account has transactions - implement referential integrity protection
     statement = select(Transaction).where(Transaction.account_id == id)
     existing_transaction = session.exec(statement).first()
     if existing_transaction:
-        raise HTTPException(
-            status_code=400, 
-            detail="Cannot delete account with existing transactions"
-        )
+        raise_referential_integrity_error("account")
     
     session.delete(account)
     session.commit()
