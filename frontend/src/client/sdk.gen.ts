@@ -3,12 +3,12 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { AccountsReadAccountsData, AccountsReadAccountsResponse, AccountsCreateAccountData, AccountsCreateAccountResponse, AccountsReadAccountData, AccountsReadAccountResponse, AccountsUpdateAccountData, AccountsUpdateAccountResponse, AccountsDeleteAccountData, AccountsDeleteAccountResponse, CategoriesReadCategoriesData, CategoriesReadCategoriesResponse, CategoriesCreateCategoryData, CategoriesCreateCategoryResponse, CategoriesReadCategoryData, CategoriesReadCategoryResponse, CategoriesUpdateCategoryData, CategoriesUpdateCategoryResponse, CategoriesDeleteCategoryData, CategoriesDeleteCategoryResponse, CategorizationRulesReadRulesData, CategorizationRulesReadRulesResponse, CategorizationRulesCreateRuleData, CategorizationRulesCreateRuleResponse, CategorizationRulesReadRuleData, CategorizationRulesReadRuleResponse, CategorizationRulesUpdateRuleData, CategorizationRulesUpdateRuleResponse, CategorizationRulesDeleteRuleData, CategorizationRulesDeleteRuleResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PrivateCreateUserData, PrivateCreateUserResponse, TransactionsReadTransactionsData, TransactionsReadTransactionsResponse, TransactionsCreateTransactionData, TransactionsCreateTransactionResponse, TransactionsGetTransactionsSummaryData, TransactionsGetTransactionsSummaryResponse, TransactionsReadTransactionData, TransactionsReadTransactionResponse, TransactionsUpdateTransactionData, TransactionsUpdateTransactionResponse, TransactionsDeleteTransactionData, TransactionsDeleteTransactionResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+import type { AccountsReadAccountsData, AccountsReadAccountsResponse, AccountsCreateAccountData, AccountsCreateAccountResponse, AccountsReadAccountData, AccountsReadAccountResponse, AccountsUpdateAccountData, AccountsUpdateAccountResponse, AccountsDeleteAccountData, AccountsDeleteAccountResponse, AnalysisGetSpendingByCategoryData, AnalysisGetSpendingByCategoryResponse, AnalysisGetSpendingTrendsData, AnalysisGetSpendingTrendsResponse, AnalysisGetAccountSummaryData, AnalysisGetAccountSummaryResponse, CategoriesReadCategoriesData, CategoriesReadCategoriesResponse, CategoriesCreateCategoryData, CategoriesCreateCategoryResponse, CategoriesReadCategoryData, CategoriesReadCategoryResponse, CategoriesUpdateCategoryData, CategoriesUpdateCategoryResponse, CategoriesDeleteCategoryData, CategoriesDeleteCategoryResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PrivateCreateUserData, PrivateCreateUserResponse, TransactionsReadTransactionsData, TransactionsReadTransactionsResponse, TransactionsCreateTransactionData, TransactionsCreateTransactionResponse, TransactionsReadUncategorizedTransactionsData, TransactionsReadUncategorizedTransactionsResponse, TransactionsReadPendingConfirmationTransactionsData, TransactionsReadPendingConfirmationTransactionsResponse, TransactionsReadTransactionData, TransactionsReadTransactionResponse, TransactionsUpdateTransactionData, TransactionsUpdateTransactionResponse, TransactionsDeleteTransactionData, TransactionsDeleteTransactionResponse, TransactionsCategorizeTransactionData, TransactionsCategorizeTransactionResponse, TransactionsConfirmTransactionData, TransactionsConfirmTransactionResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
 
 export class AccountsService {
     /**
      * Read Accounts
-     * Retrieve accounts for the current user.
+     * Retrieve accounts.
      * @param data The data for the request.
      * @param data.skip
      * @param data.limit
@@ -116,10 +116,94 @@ export class AccountsService {
     }
 }
 
+export class AnalysisService {
+    /**
+     * Get Spending By Category
+     * Get spending analysis by category for a specified time period.
+     *
+     * Returns total spending per category with percentages and transaction counts.
+     * Only includes expense transactions in the analysis.
+     * @param data The data for the request.
+     * @param data.dateFrom Start date for analysis (inclusive)
+     * @param data.dateTo End date for analysis (inclusive)
+     * @param data.accountId Filter by specific account
+     * @returns SpendingByCategoryResponse Successful Response
+     * @throws ApiError
+     */
+    public static getSpendingByCategory(data: AnalysisGetSpendingByCategoryData = {}): CancelablePromise<AnalysisGetSpendingByCategoryResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/analysis/spending-by-category',
+            query: {
+                date_from: data.dateFrom,
+                date_to: data.dateTo,
+                account_id: data.accountId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Get Spending Trends
+     * Get monthly spending trends for a specified time period.
+     *
+     * Returns total spending per month with transaction counts.
+     * Only includes expense transactions in the analysis.
+     * @param data The data for the request.
+     * @param data.dateFrom Start date for analysis (inclusive)
+     * @param data.dateTo End date for analysis (inclusive)
+     * @param data.accountId Filter by specific account
+     * @returns SpendingTrendsResponse Successful Response
+     * @throws ApiError
+     */
+    public static getSpendingTrends(data: AnalysisGetSpendingTrendsData = {}): CancelablePromise<AnalysisGetSpendingTrendsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/analysis/spending-trends',
+            query: {
+                date_from: data.dateFrom,
+                date_to: data.dateTo,
+                account_id: data.accountId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Get Account Summary
+     * Get financial summary per account and consolidated totals.
+     *
+     * Returns expense, income, and net amounts for each account,
+     * plus consolidated totals across all accounts.
+     * @param data The data for the request.
+     * @param data.dateFrom Start date for analysis (inclusive)
+     * @param data.dateTo End date for analysis (inclusive)
+     * @returns AccountSummaryResponse Successful Response
+     * @throws ApiError
+     */
+    public static getAccountSummary(data: AnalysisGetAccountSummaryData = {}): CancelablePromise<AnalysisGetAccountSummaryResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/analysis/account-summary',
+            query: {
+                date_from: data.dateFrom,
+                date_to: data.dateTo
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
 export class CategoriesService {
     /**
      * Read Categories
-     * Retrieve categories for the current user.
+     * Retrieve categories.
      * @param data The data for the request.
      * @param data.skip
      * @param data.limit
@@ -227,26 +311,23 @@ export class CategoriesService {
     }
 }
 
-export class CategorizationRulesService {
+export class ItemsService {
     /**
-     * Read Rules
-     * Retrieve categorization rules for the current user.
-     * Optionally filter by account_id (includes global rules with account_id=None).
+     * Read Items
+     * Retrieve items.
      * @param data The data for the request.
      * @param data.skip
      * @param data.limit
-     * @param data.accountId
-     * @returns CategorizationRulesPublic Successful Response
+     * @returns ItemsPublic Successful Response
      * @throws ApiError
      */
-    public static readRules(data: CategorizationRulesReadRulesData = {}): CancelablePromise<CategorizationRulesReadRulesResponse> {
+    public static readItems(data: ItemsReadItemsData = {}): CancelablePromise<ItemsReadItemsResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/v1/rules/',
+            url: '/api/v1/items/',
             query: {
                 skip: data.skip,
-                limit: data.limit,
-                account_id: data.accountId
+                limit: data.limit
             },
             errors: {
                 422: 'Validation Error'
@@ -255,17 +336,17 @@ export class CategorizationRulesService {
     }
     
     /**
-     * Create Rule
-     * Create new categorization rule.
+     * Create Item
+     * Create new item.
      * @param data The data for the request.
      * @param data.requestBody
-     * @returns CategorizationRulePublic Successful Response
+     * @returns ItemPublic Successful Response
      * @throws ApiError
      */
-    public static createRule(data: CategorizationRulesCreateRuleData): CancelablePromise<CategorizationRulesCreateRuleResponse> {
+    public static createItem(data: ItemsCreateItemData): CancelablePromise<ItemsCreateItemResponse> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/v1/rules/',
+            url: '/api/v1/items/',
             body: data.requestBody,
             mediaType: 'application/json',
             errors: {
@@ -275,17 +356,17 @@ export class CategorizationRulesService {
     }
     
     /**
-     * Read Rule
-     * Get categorization rule by ID.
+     * Read Item
+     * Get item by ID.
      * @param data The data for the request.
      * @param data.id
-     * @returns CategorizationRulePublic Successful Response
+     * @returns ItemPublic Successful Response
      * @throws ApiError
      */
-    public static readRule(data: CategorizationRulesReadRuleData): CancelablePromise<CategorizationRulesReadRuleResponse> {
+    public static readItem(data: ItemsReadItemData): CancelablePromise<ItemsReadItemResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/v1/rules/{id}',
+            url: '/api/v1/items/{id}',
             path: {
                 id: data.id
             },
@@ -296,18 +377,18 @@ export class CategorizationRulesService {
     }
     
     /**
-     * Update Rule
-     * Update a categorization rule.
+     * Update Item
+     * Update an item.
      * @param data The data for the request.
      * @param data.id
      * @param data.requestBody
-     * @returns CategorizationRulePublic Successful Response
+     * @returns ItemPublic Successful Response
      * @throws ApiError
      */
-    public static updateRule(data: CategorizationRulesUpdateRuleData): CancelablePromise<CategorizationRulesUpdateRuleResponse> {
+    public static updateItem(data: ItemsUpdateItemData): CancelablePromise<ItemsUpdateItemResponse> {
         return __request(OpenAPI, {
             method: 'PUT',
-            url: '/api/v1/rules/{id}',
+            url: '/api/v1/items/{id}',
             path: {
                 id: data.id
             },
@@ -320,17 +401,17 @@ export class CategorizationRulesService {
     }
     
     /**
-     * Delete Rule
-     * Delete a categorization rule.
+     * Delete Item
+     * Delete an item.
      * @param data The data for the request.
      * @param data.id
      * @returns Message Successful Response
      * @throws ApiError
      */
-    public static deleteRule(data: CategorizationRulesDeleteRuleData): CancelablePromise<CategorizationRulesDeleteRuleResponse> {
+    public static deleteItem(data: ItemsDeleteItemData): CancelablePromise<ItemsDeleteItemResponse> {
         return __request(OpenAPI, {
             method: 'DELETE',
-            url: '/api/v1/rules/{id}',
+            url: '/api/v1/items/{id}',
             path: {
                 id: data.id
             },
@@ -463,14 +544,16 @@ export class PrivateService {
 export class TransactionsService {
     /**
      * Read Transactions
-     * Retrieve transactions for the current user with optional filters.
+     * Retrieve transactions with optional filtering by account, category, status, and date range.
+     * Use category_id='uncategorized' to filter for transactions without a category.
      * @param data The data for the request.
      * @param data.skip
      * @param data.limit
-     * @param data.accountId
-     * @param data.categoryId
-     * @param data.startDate
-     * @param data.endDate
+     * @param data.accountId Filter by account ID
+     * @param data.categoryId Filter by category ID (use 'uncategorized' for NULL)
+     * @param data.status Filter by transaction status
+     * @param data.startDate Filter transactions from this date (inclusive)
+     * @param data.endDate Filter transactions to this date (inclusive)
      * @returns TransactionsPublic Successful Response
      * @throws ApiError
      */
@@ -483,6 +566,7 @@ export class TransactionsService {
                 limit: data.limit,
                 account_id: data.accountId,
                 category_id: data.categoryId,
+                status: data.status,
                 start_date: data.startDate,
                 end_date: data.endDate
             },
@@ -494,7 +578,7 @@ export class TransactionsService {
     
     /**
      * Create Transaction
-     * Create new transaction.
+     * Create new transaction with duplicate prevention.
      * @param data The data for the request.
      * @param data.requestBody
      * @returns TransactionPublic Successful Response
@@ -513,24 +597,44 @@ export class TransactionsService {
     }
     
     /**
-     * Get Transactions Summary
-     * Get transaction summary grouped by category for dashboard.
-     * Returns total amount and count per category.
+     * Read Uncategorized Transactions
+     * Retrieve transactions that need categorization (category_id is NULL).
      * @param data The data for the request.
-     * @param data.startDate
-     * @param data.endDate
-     * @param data.accountId
-     * @returns CategorySummary Successful Response
+     * @param data.skip
+     * @param data.limit
+     * @returns TransactionsPublic Successful Response
      * @throws ApiError
      */
-    public static getTransactionsSummary(data: TransactionsGetTransactionsSummaryData = {}): CancelablePromise<TransactionsGetTransactionsSummaryResponse> {
+    public static readUncategorizedTransactions(data: TransactionsReadUncategorizedTransactionsData = {}): CancelablePromise<TransactionsReadUncategorizedTransactionsResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/v1/transactions/summary/by-category',
+            url: '/api/v1/transactions/uncategorized',
             query: {
-                start_date: data.startDate,
-                end_date: data.endDate,
-                account_id: data.accountId
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Pending Confirmation Transactions
+     * Retrieve transactions that need confirmation (status is 'auto').
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @returns TransactionsPublic Successful Response
+     * @throws ApiError
+     */
+    public static readPendingConfirmationTransactions(data: TransactionsReadPendingConfirmationTransactionsData = {}): CancelablePromise<TransactionsReadPendingConfirmationTransactionsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/transactions/pending-confirmation',
+            query: {
+                skip: data.skip,
+                limit: data.limit
             },
             errors: {
                 422: 'Validation Error'
@@ -561,7 +665,7 @@ export class TransactionsService {
     
     /**
      * Update Transaction
-     * Update a transaction.
+     * Update a transaction while maintaining data integrity.
      * @param data The data for the request.
      * @param data.id
      * @param data.requestBody
@@ -595,6 +699,52 @@ export class TransactionsService {
         return __request(OpenAPI, {
             method: 'DELETE',
             url: '/api/v1/transactions/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Categorize Transaction
+     * Manually categorize a transaction (sets status to 'manual').
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.categoryId
+     * @returns TransactionPublic Successful Response
+     * @throws ApiError
+     */
+    public static categorizeTransaction(data: TransactionsCategorizeTransactionData): CancelablePromise<TransactionsCategorizeTransactionResponse> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/v1/transactions/{id}/categorize',
+            path: {
+                id: data.id
+            },
+            query: {
+                category_id: data.categoryId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Confirm Transaction
+     * Confirm an auto-categorized transaction (changes status from 'auto' to 'confirmed').
+     * @param data The data for the request.
+     * @param data.id
+     * @returns TransactionPublic Successful Response
+     * @throws ApiError
+     */
+    public static confirmTransaction(data: TransactionsConfirmTransactionData): CancelablePromise<TransactionsConfirmTransactionResponse> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/v1/transactions/{id}/confirm',
             path: {
                 id: data.id
             },

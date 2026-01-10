@@ -34,14 +34,23 @@ export function CategorySelector({
   })
 
   const categorizeMutation = useMutation({
-    mutationFn: (categoryId: string | null) =>
-      TransactionsService.updateTransaction({
-        id: transactionId,
-        requestBody: {
-          category_id: categoryId,
-          status: categoryId ? "manual" : null,
-        },
-      }),
+    mutationFn: (categoryId: string | null) => {
+      if (categoryId) {
+        // Use the dedicated categorize endpoint which sets status to 'manual'
+        return TransactionsService.categorizeTransaction({
+          id: transactionId,
+          categoryId: categoryId,
+        })
+      } else {
+        // For uncategorizing, use the update endpoint
+        return TransactionsService.updateTransaction({
+          id: transactionId,
+          requestBody: {
+            category_id: null,
+          },
+        })
+      }
+    },
     onSuccess: () => {
       showSuccessToast("Transaction categorized successfully")
       queryClient.invalidateQueries({ queryKey: ["transactions"] })

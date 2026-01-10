@@ -146,7 +146,6 @@ const AddTransaction = () => {
       account_id: data.account_id,
       category_id: data.category_id || null,
       note: data.note || null,
-      status: "manual",
     })
   }
 

@@ -32,6 +32,7 @@ function getTransactionsQueryOptions(filters: TransactionFiltersState) {
         categoryId: filters.categoryId,
         startDate: filters.startDate,
         endDate: filters.endDate,
+        status: filters.status,
       }),
     queryKey: [
       "transactions",
@@ -39,6 +40,7 @@ function getTransactionsQueryOptions(filters: TransactionFiltersState) {
       filters.categoryId,
       filters.startDate,
       filters.endDate,
+      filters.status,
     ],
   }
 }

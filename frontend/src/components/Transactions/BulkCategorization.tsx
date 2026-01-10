@@ -51,15 +51,23 @@ export function BulkCategorization({
     mutationFn: async (categoryId: string | null) => {
       // Update each transaction sequentially
       const results = await Promise.all(
-        selectedTransactionIds.map((id) =>
-          TransactionsService.updateTransaction({
-            id,
-            requestBody: {
-              category_id: categoryId,
-              status: categoryId ? "manual" : null,
-            },
-          }),
-        ),
+        selectedTransactionIds.map((id) => {
+          if (categoryId) {
+            // Use the dedicated categorize endpoint which sets status to 'manual'
+            return TransactionsService.categorizeTransaction({
+              id,
+              categoryId,
+            })
+          } else {
+            // For uncategorizing, use the update endpoint
+            return TransactionsService.updateTransaction({
+              id,
+              requestBody: {
+                category_id: null,
+              },
+            })
+          }
+        }),
       )
       return results
     },

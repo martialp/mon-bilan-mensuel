@@ -35,14 +35,11 @@ export function BulkConfirmation({
 
   const bulkConfirmMutation = useMutation({
     mutationFn: async () => {
-      // Update each transaction sequentially
+      // Confirm each transaction using the dedicated endpoint
       const results = await Promise.all(
         selectedTransactionIds.map((id) =>
-          TransactionsService.updateTransaction({
+          TransactionsService.confirmTransaction({
             id,
-            requestBody: {
-              status: "confirmed",
-            },
           }),
         ),
       )

@@ -13,13 +13,38 @@ export type AccountPublic = {
     institution?: (string | null);
     description?: (string | null);
     id: string;
-    owner_id: string;
     created_at: string;
+};
+
+/**
+ * Spending summary for a single account.
+ */
+export type AccountSpending = {
+    account_id: string;
+    account_name: string;
+    account_type: string;
+    total_expense_cents: number;
+    total_income_cents: number;
+    net_cents: number;
+    transaction_count: number;
 };
 
 export type AccountsPublic = {
     data: Array<AccountPublic>;
     count: number;
+};
+
+/**
+ * Response for account summary analysis.
+ */
+export type AccountSummaryResponse = {
+    accounts: Array<AccountSpending>;
+    consolidated_expense_cents: number;
+    consolidated_income_cents: number;
+    consolidated_net_cents: number;
+    total_transaction_count: number;
+    period_start: (string | null);
+    period_end: (string | null);
 };
 
 export type AccountType = 'credit_card' | 'chequing' | 'savings' | 'investment' | 'other';
@@ -45,35 +70,6 @@ export type CategoriesPublic = {
     count: number;
 };
 
-export type CategorizationRuleCreate = {
-    rule_text: string;
-    priority?: number;
-    account_id?: (string | null);
-    category_id: string;
-};
-
-export type CategorizationRulePublic = {
-    rule_text: string;
-    priority?: number;
-    id: string;
-    owner_id: string;
-    account_id: (string | null);
-    category_id: string;
-    created_at: string;
-};
-
-export type CategorizationRulesPublic = {
-    data: Array<CategorizationRulePublic>;
-    count: number;
-};
-
-export type CategorizationRuleUpdate = {
-    rule_text?: (string | null);
-    priority?: (number | null);
-    account_id?: (string | null);
-    category_id?: (string | null);
-};
-
 export type CategoryCreate = {
     name: string;
 };
@@ -81,14 +77,17 @@ export type CategoryCreate = {
 export type CategoryPublic = {
     name: string;
     id: string;
-    owner_id: string;
     created_at: string;
 };
 
-export type CategorySummary = {
+/**
+ * Spending data for a single category.
+ */
+export type CategorySpending = {
     category_id: (string | null);
     category_name: (string | null);
     total_cents: number;
+    percentage: number;
     transaction_count: number;
 };
 
@@ -100,8 +99,40 @@ export type HTTPValidationError = {
     detail?: Array<ValidationError>;
 };
 
+export type ItemCreate = {
+    title: string;
+    description?: (string | null);
+};
+
+export type ItemPublic = {
+    title: string;
+    description?: (string | null);
+    id: string;
+    owner_id: string;
+};
+
+export type ItemsPublic = {
+    data: Array<ItemPublic>;
+    count: number;
+};
+
+export type ItemUpdate = {
+    title?: (string | null);
+    description?: (string | null);
+};
+
 export type Message = {
     message: string;
+};
+
+/**
+ * Spending data for a single month.
+ */
+export type MonthlySpending = {
+    year: number;
+    month: number;
+    total_cents: number;
+    transaction_count: number;
 };
 
 export type NewPassword = {
@@ -114,6 +145,26 @@ export type PrivateUserCreate = {
     password: string;
     full_name: string;
     is_verified?: boolean;
+};
+
+/**
+ * Response for spending by category analysis.
+ */
+export type SpendingByCategoryResponse = {
+    data: Array<CategorySpending>;
+    total_spending_cents: number;
+    period_start: (string | null);
+    period_end: (string | null);
+};
+
+/**
+ * Response for monthly spending trends.
+ */
+export type SpendingTrendsResponse = {
+    data: Array<MonthlySpending>;
+    total_spending_cents: number;
+    period_start: (string | null);
+    period_end: (string | null);
 };
 
 export type Token = {
@@ -132,7 +183,6 @@ export type TransactionCreate = {
     statement_date?: (string | null);
     account_id: string;
     category_id?: (string | null);
-    status?: TransactionStatus;
 };
 
 export type TransactionPublic = {
@@ -145,11 +195,12 @@ export type TransactionPublic = {
     source_file?: (string | null);
     statement_date?: (string | null);
     id: string;
-    owner_id: string;
     account_id: string;
     category_id: (string | null);
     status: TransactionStatus;
     created_at: string;
+    account: AccountPublic;
+    category: (CategoryPublic | null);
 };
 
 export type TransactionsPublic = {
@@ -167,9 +218,10 @@ export type TransactionUpdate = {
     description?: (string | null);
     amount_cents?: (number | null);
     type?: (TransactionType | null);
-    category_id?: (string | null);
-    status?: (TransactionStatus | null);
     note?: (string | null);
+    source_file?: (string | null);
+    statement_date?: (string | null);
+    category_id?: (string | null);
 };
 
 export type UpdatePassword = {
@@ -255,6 +307,53 @@ export type AccountsDeleteAccountData = {
 
 export type AccountsDeleteAccountResponse = (Message);
 
+export type AnalysisGetSpendingByCategoryData = {
+    /**
+     * Filter by specific account
+     */
+    accountId?: (string | null);
+    /**
+     * Start date for analysis (inclusive)
+     */
+    dateFrom?: (string | null);
+    /**
+     * End date for analysis (inclusive)
+     */
+    dateTo?: (string | null);
+};
+
+export type AnalysisGetSpendingByCategoryResponse = (SpendingByCategoryResponse);
+
+export type AnalysisGetSpendingTrendsData = {
+    /**
+     * Filter by specific account
+     */
+    accountId?: (string | null);
+    /**
+     * Start date for analysis (inclusive)
+     */
+    dateFrom?: (string | null);
+    /**
+     * End date for analysis (inclusive)
+     */
+    dateTo?: (string | null);
+};
+
+export type AnalysisGetSpendingTrendsResponse = (SpendingTrendsResponse);
+
+export type AnalysisGetAccountSummaryData = {
+    /**
+     * Start date for analysis (inclusive)
+     */
+    dateFrom?: (string | null);
+    /**
+     * End date for analysis (inclusive)
+     */
+    dateTo?: (string | null);
+};
+
+export type AnalysisGetAccountSummaryResponse = (AccountSummaryResponse);
+
 export type CategoriesReadCategoriesData = {
     limit?: number;
     skip?: number;
@@ -287,38 +386,37 @@ export type CategoriesDeleteCategoryData = {
 
 export type CategoriesDeleteCategoryResponse = (Message);
 
-export type CategorizationRulesReadRulesData = {
-    accountId?: (string | null);
+export type ItemsReadItemsData = {
     limit?: number;
     skip?: number;
 };
 
-export type CategorizationRulesReadRulesResponse = (CategorizationRulesPublic);
+export type ItemsReadItemsResponse = (ItemsPublic);
 
-export type CategorizationRulesCreateRuleData = {
-    requestBody: CategorizationRuleCreate;
+export type ItemsCreateItemData = {
+    requestBody: ItemCreate;
 };
 
-export type CategorizationRulesCreateRuleResponse = (CategorizationRulePublic);
+export type ItemsCreateItemResponse = (ItemPublic);
 
-export type CategorizationRulesReadRuleData = {
+export type ItemsReadItemData = {
     id: string;
 };
 
-export type CategorizationRulesReadRuleResponse = (CategorizationRulePublic);
+export type ItemsReadItemResponse = (ItemPublic);
 
-export type CategorizationRulesUpdateRuleData = {
+export type ItemsUpdateItemData = {
     id: string;
-    requestBody: CategorizationRuleUpdate;
+    requestBody: ItemUpdate;
 };
 
-export type CategorizationRulesUpdateRuleResponse = (CategorizationRulePublic);
+export type ItemsUpdateItemResponse = (ItemPublic);
 
-export type CategorizationRulesDeleteRuleData = {
+export type ItemsDeleteItemData = {
     id: string;
 };
 
-export type CategorizationRulesDeleteRuleResponse = (Message);
+export type ItemsDeleteItemResponse = (Message);
 
 export type LoginLoginAccessTokenData = {
     formData: Body_login_login_access_token;
@@ -353,12 +451,28 @@ export type PrivateCreateUserData = {
 export type PrivateCreateUserResponse = (UserPublic);
 
 export type TransactionsReadTransactionsData = {
+    /**
+     * Filter by account ID
+     */
     accountId?: (string | null);
+    /**
+     * Filter by category ID (use 'uncategorized' for NULL)
+     */
     categoryId?: (string | null);
+    /**
+     * Filter transactions to this date (inclusive)
+     */
     endDate?: (string | null);
     limit?: number;
     skip?: number;
+    /**
+     * Filter transactions from this date (inclusive)
+     */
     startDate?: (string | null);
+    /**
+     * Filter by transaction status
+     */
+    status?: (TransactionStatus | null);
 };
 
 export type TransactionsReadTransactionsResponse = (TransactionsPublic);
@@ -369,13 +483,19 @@ export type TransactionsCreateTransactionData = {
 
 export type TransactionsCreateTransactionResponse = (TransactionPublic);
 
-export type TransactionsGetTransactionsSummaryData = {
-    accountId?: (string | null);
-    endDate?: (string | null);
-    startDate?: (string | null);
+export type TransactionsReadUncategorizedTransactionsData = {
+    limit?: number;
+    skip?: number;
 };
 
-export type TransactionsGetTransactionsSummaryResponse = (Array<CategorySummary>);
+export type TransactionsReadUncategorizedTransactionsResponse = (TransactionsPublic);
+
+export type TransactionsReadPendingConfirmationTransactionsData = {
+    limit?: number;
+    skip?: number;
+};
+
+export type TransactionsReadPendingConfirmationTransactionsResponse = (TransactionsPublic);
 
 export type TransactionsReadTransactionData = {
     id: string;
@@ -395,6 +515,19 @@ export type TransactionsDeleteTransactionData = {
 };
 
 export type TransactionsDeleteTransactionResponse = (Message);
+
+export type TransactionsCategorizeTransactionData = {
+    categoryId: string;
+    id: string;
+};
+
+export type TransactionsCategorizeTransactionResponse = (TransactionPublic);
+
+export type TransactionsConfirmTransactionData = {
+    id: string;
+};
+
+export type TransactionsConfirmTransactionResponse = (TransactionPublic);
 
 export type UsersReadUsersData = {
     limit?: number;

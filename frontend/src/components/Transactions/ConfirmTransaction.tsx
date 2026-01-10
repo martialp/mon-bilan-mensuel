@@ -27,11 +27,8 @@ export function ConfirmTransaction({
 
   const confirmMutation = useMutation({
     mutationFn: () =>
-      TransactionsService.updateTransaction({
+      TransactionsService.confirmTransaction({
         id: transaction.id,
-        requestBody: {
-          status: "confirmed",
-        },
       }),
     onSuccess: () => {
       showSuccessToast("Transaction confirmed successfully")

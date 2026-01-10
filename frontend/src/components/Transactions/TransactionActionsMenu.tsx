@@ -33,11 +33,8 @@ export const TransactionActionsMenu = ({
 
   const confirmMutation = useMutation({
     mutationFn: () =>
-      TransactionsService.updateTransaction({
+      TransactionsService.confirmTransaction({
         id: transaction.id,
-        requestBody: {
-          status: "confirmed",
-        },
       }),
     onSuccess: () => {
       showSuccessToast("Transaction confirmed successfully")
