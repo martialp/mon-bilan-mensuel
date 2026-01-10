@@ -3,7 +3,7 @@ import { Trash2 } from "lucide-react"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 
-import { ItemsService } from "@/client"
+import { AccountsService } from "@/client"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -19,31 +19,32 @@ import { LoadingButton } from "@/components/ui/loading-button"
 import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
 
-interface DeleteItemProps {
+interface DeleteAccountProps {
   id: string
+  name: string
   onSuccess: () => void
 }
 
-const DeleteItem = ({ id, onSuccess }: DeleteItemProps) => {
+const DeleteAccount = ({ id, name, onSuccess }: DeleteAccountProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const queryClient = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const { handleSubmit } = useForm()
 
-  const deleteItem = async (id: string) => {
-    await ItemsService.deleteItem({ id: id })
+  const deleteAccount = async (id: string) => {
+    await AccountsService.deleteAccount({ id: id })
   }
 
   const mutation = useMutation({
-    mutationFn: deleteItem,
+    mutationFn: deleteAccount,
     onSuccess: () => {
-      showSuccessToast("The item was deleted successfully")
+      showSuccessToast("The account was deleted successfully")
       setIsOpen(false)
       onSuccess()
     },
     onError: handleError.bind(showErrorToast),
     onSettled: () => {
-      queryClient.invalidateQueries()
+      queryClient.invalidateQueries({ queryKey: ["accounts"] })
     },
   })
 
@@ -59,15 +60,20 @@ const DeleteItem = ({ id, onSuccess }: DeleteItemProps) => {
         onClick={() => setIsOpen(true)}
       >
         <Trash2 />
-        Delete Item
+        Delete Account
       </DropdownMenuItem>
       <DialogContent className="sm:max-w-md">
         <form onSubmit={handleSubmit(onSubmit)}>
           <DialogHeader>
-            <DialogTitle>Delete Item</DialogTitle>
+            <DialogTitle>Delete Account</DialogTitle>
             <DialogDescription>
-              This item will be permanently deleted. Are you sure? You will not
-              be able to undo this action.
+              Are you sure you want to delete the account "{name}"? This action
+              cannot be undone.
+              <br />
+              <br />
+              <strong>Note:</strong> Accounts with existing transactions cannot
+              be deleted. You must first delete or reassign all transactions
+              associated with this account.
             </DialogDescription>
           </DialogHeader>
 
@@ -91,4 +97,4 @@ const DeleteItem = ({ id, onSuccess }: DeleteItemProps) => {
   )
 }
 
-export default DeleteItem
+export default DeleteAccount

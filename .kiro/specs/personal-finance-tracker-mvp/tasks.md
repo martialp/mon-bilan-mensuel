@@ -119,14 +119,14 @@ This implementation plan breaks down the personal finance tracker MVP into discr
   - Add utility functions for currency formatting and date handling
   - _Requirements: 6.3_
 
-- [ ] 12. Implement account management UI
+- [x] 12. Implement account management UI
   - Create AccountList component to display all accounts
   - Create AccountForm component for creating/editing accounts
   - Add account type selection and validation
   - Implement account deletion with confirmation dialog
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 6.1, 6.2_
 
-- [ ] 12.1 Write unit tests for account UI components
+- [x] 12.1 Write unit tests for account UI components
   - Test account form validation and submission
   - Test account list rendering and interactions
   - _Requirements: 3.1, 3.2, 6.2_

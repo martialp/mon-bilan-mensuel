@@ -8,12 +8,14 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-const PendingItems = () => (
+const PendingAccounts = () => (
   <Table>
     <TableHeader>
       <TableRow>
         <TableHead>ID</TableHead>
-        <TableHead>Title</TableHead>
+        <TableHead>Name</TableHead>
+        <TableHead>Type</TableHead>
+        <TableHead>Institution</TableHead>
         <TableHead>Description</TableHead>
         <TableHead>
           <span className="sr-only">Actions</span>
@@ -30,6 +32,12 @@ const PendingItems = () => (
             <Skeleton className="h-4 w-32" />
           </TableCell>
           <TableCell>
+            <Skeleton className="h-4 w-24" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-4 w-28" />
+          </TableCell>
+          <TableCell>
             <Skeleton className="h-4 w-48" />
           </TableCell>
           <TableCell>
@@ -43,4 +51,4 @@ const PendingItems = () => (
   </Table>
 )
 
-export default PendingItems
+export default PendingAccounts
