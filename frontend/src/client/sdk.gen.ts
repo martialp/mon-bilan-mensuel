@@ -3,22 +3,22 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PrivateCreateUserData, PrivateCreateUserResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+import type { AccountsReadAccountsData, AccountsReadAccountsResponse, AccountsCreateAccountData, AccountsCreateAccountResponse, AccountsReadAccountData, AccountsReadAccountResponse, AccountsUpdateAccountData, AccountsUpdateAccountResponse, AccountsDeleteAccountData, AccountsDeleteAccountResponse, CategoriesReadCategoriesData, CategoriesReadCategoriesResponse, CategoriesCreateCategoryData, CategoriesCreateCategoryResponse, CategoriesReadCategoryData, CategoriesReadCategoryResponse, CategoriesUpdateCategoryData, CategoriesUpdateCategoryResponse, CategoriesDeleteCategoryData, CategoriesDeleteCategoryResponse, CategorizationRulesReadRulesData, CategorizationRulesReadRulesResponse, CategorizationRulesCreateRuleData, CategorizationRulesCreateRuleResponse, CategorizationRulesReadRuleData, CategorizationRulesReadRuleResponse, CategorizationRulesUpdateRuleData, CategorizationRulesUpdateRuleResponse, CategorizationRulesDeleteRuleData, CategorizationRulesDeleteRuleResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PrivateCreateUserData, PrivateCreateUserResponse, TransactionsReadTransactionsData, TransactionsReadTransactionsResponse, TransactionsCreateTransactionData, TransactionsCreateTransactionResponse, TransactionsGetTransactionsSummaryData, TransactionsGetTransactionsSummaryResponse, TransactionsReadTransactionData, TransactionsReadTransactionResponse, TransactionsUpdateTransactionData, TransactionsUpdateTransactionResponse, TransactionsDeleteTransactionData, TransactionsDeleteTransactionResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
 
-export class ItemsService {
+export class AccountsService {
     /**
-     * Read Items
-     * Retrieve items.
+     * Read Accounts
+     * Retrieve accounts for the current user.
      * @param data The data for the request.
      * @param data.skip
      * @param data.limit
-     * @returns ItemsPublic Successful Response
+     * @returns AccountsPublic Successful Response
      * @throws ApiError
      */
-    public static readItems(data: ItemsReadItemsData = {}): CancelablePromise<ItemsReadItemsResponse> {
+    public static readAccounts(data: AccountsReadAccountsData = {}): CancelablePromise<AccountsReadAccountsResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/v1/items/',
+            url: '/api/v1/accounts/',
             query: {
                 skip: data.skip,
                 limit: data.limit
@@ -30,17 +30,17 @@ export class ItemsService {
     }
     
     /**
-     * Create Item
-     * Create new item.
+     * Create Account
+     * Create new account.
      * @param data The data for the request.
      * @param data.requestBody
-     * @returns ItemPublic Successful Response
+     * @returns AccountPublic Successful Response
      * @throws ApiError
      */
-    public static createItem(data: ItemsCreateItemData): CancelablePromise<ItemsCreateItemResponse> {
+    public static createAccount(data: AccountsCreateAccountData): CancelablePromise<AccountsCreateAccountResponse> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/v1/items/',
+            url: '/api/v1/accounts/',
             body: data.requestBody,
             mediaType: 'application/json',
             errors: {
@@ -50,17 +50,17 @@ export class ItemsService {
     }
     
     /**
-     * Read Item
-     * Get item by ID.
+     * Read Account
+     * Get account by ID.
      * @param data The data for the request.
      * @param data.id
-     * @returns ItemPublic Successful Response
+     * @returns AccountPublic Successful Response
      * @throws ApiError
      */
-    public static readItem(data: ItemsReadItemData): CancelablePromise<ItemsReadItemResponse> {
+    public static readAccount(data: AccountsReadAccountData): CancelablePromise<AccountsReadAccountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/v1/items/{id}',
+            url: '/api/v1/accounts/{id}',
             path: {
                 id: data.id
             },
@@ -71,18 +71,18 @@ export class ItemsService {
     }
     
     /**
-     * Update Item
-     * Update an item.
+     * Update Account
+     * Update an account.
      * @param data The data for the request.
      * @param data.id
      * @param data.requestBody
-     * @returns ItemPublic Successful Response
+     * @returns AccountPublic Successful Response
      * @throws ApiError
      */
-    public static updateItem(data: ItemsUpdateItemData): CancelablePromise<ItemsUpdateItemResponse> {
+    public static updateAccount(data: AccountsUpdateAccountData): CancelablePromise<AccountsUpdateAccountResponse> {
         return __request(OpenAPI, {
             method: 'PUT',
-            url: '/api/v1/items/{id}',
+            url: '/api/v1/accounts/{id}',
             path: {
                 id: data.id
             },
@@ -95,17 +95,242 @@ export class ItemsService {
     }
     
     /**
-     * Delete Item
-     * Delete an item.
+     * Delete Account
+     * Delete an account.
      * @param data The data for the request.
      * @param data.id
      * @returns Message Successful Response
      * @throws ApiError
      */
-    public static deleteItem(data: ItemsDeleteItemData): CancelablePromise<ItemsDeleteItemResponse> {
+    public static deleteAccount(data: AccountsDeleteAccountData): CancelablePromise<AccountsDeleteAccountResponse> {
         return __request(OpenAPI, {
             method: 'DELETE',
-            url: '/api/v1/items/{id}',
+            url: '/api/v1/accounts/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class CategoriesService {
+    /**
+     * Read Categories
+     * Retrieve categories for the current user.
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @returns CategoriesPublic Successful Response
+     * @throws ApiError
+     */
+    public static readCategories(data: CategoriesReadCategoriesData = {}): CancelablePromise<CategoriesReadCategoriesResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/categories/',
+            query: {
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Create Category
+     * Create new category.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns CategoryPublic Successful Response
+     * @throws ApiError
+     */
+    public static createCategory(data: CategoriesCreateCategoryData): CancelablePromise<CategoriesCreateCategoryResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/categories/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Category
+     * Get category by ID.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns CategoryPublic Successful Response
+     * @throws ApiError
+     */
+    public static readCategory(data: CategoriesReadCategoryData): CancelablePromise<CategoriesReadCategoryResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/categories/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Category
+     * Update a category.
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns CategoryPublic Successful Response
+     * @throws ApiError
+     */
+    public static updateCategory(data: CategoriesUpdateCategoryData): CancelablePromise<CategoriesUpdateCategoryResponse> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/v1/categories/{id}',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Category
+     * Delete a category.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static deleteCategory(data: CategoriesDeleteCategoryData): CancelablePromise<CategoriesDeleteCategoryResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/categories/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class CategorizationRulesService {
+    /**
+     * Read Rules
+     * Retrieve categorization rules for the current user.
+     * Optionally filter by account_id (includes global rules with account_id=None).
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @param data.accountId
+     * @returns CategorizationRulesPublic Successful Response
+     * @throws ApiError
+     */
+    public static readRules(data: CategorizationRulesReadRulesData = {}): CancelablePromise<CategorizationRulesReadRulesResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/rules/',
+            query: {
+                skip: data.skip,
+                limit: data.limit,
+                account_id: data.accountId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Create Rule
+     * Create new categorization rule.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns CategorizationRulePublic Successful Response
+     * @throws ApiError
+     */
+    public static createRule(data: CategorizationRulesCreateRuleData): CancelablePromise<CategorizationRulesCreateRuleResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/rules/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Rule
+     * Get categorization rule by ID.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns CategorizationRulePublic Successful Response
+     * @throws ApiError
+     */
+    public static readRule(data: CategorizationRulesReadRuleData): CancelablePromise<CategorizationRulesReadRuleResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/rules/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Rule
+     * Update a categorization rule.
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns CategorizationRulePublic Successful Response
+     * @throws ApiError
+     */
+    public static updateRule(data: CategorizationRulesUpdateRuleData): CancelablePromise<CategorizationRulesUpdateRuleResponse> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/v1/rules/{id}',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Rule
+     * Delete a categorization rule.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static deleteRule(data: CategorizationRulesDeleteRuleData): CancelablePromise<CategorizationRulesDeleteRuleResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/rules/{id}',
             path: {
                 id: data.id
             },
@@ -228,6 +453,151 @@ export class PrivateService {
             url: '/api/v1/private/users/',
             body: data.requestBody,
             mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class TransactionsService {
+    /**
+     * Read Transactions
+     * Retrieve transactions for the current user with optional filters.
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @param data.accountId
+     * @param data.categoryId
+     * @param data.startDate
+     * @param data.endDate
+     * @returns TransactionsPublic Successful Response
+     * @throws ApiError
+     */
+    public static readTransactions(data: TransactionsReadTransactionsData = {}): CancelablePromise<TransactionsReadTransactionsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/transactions/',
+            query: {
+                skip: data.skip,
+                limit: data.limit,
+                account_id: data.accountId,
+                category_id: data.categoryId,
+                start_date: data.startDate,
+                end_date: data.endDate
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Create Transaction
+     * Create new transaction.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns TransactionPublic Successful Response
+     * @throws ApiError
+     */
+    public static createTransaction(data: TransactionsCreateTransactionData): CancelablePromise<TransactionsCreateTransactionResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/transactions/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Get Transactions Summary
+     * Get transaction summary grouped by category for dashboard.
+     * Returns total amount and count per category.
+     * @param data The data for the request.
+     * @param data.startDate
+     * @param data.endDate
+     * @param data.accountId
+     * @returns CategorySummary Successful Response
+     * @throws ApiError
+     */
+    public static getTransactionsSummary(data: TransactionsGetTransactionsSummaryData = {}): CancelablePromise<TransactionsGetTransactionsSummaryResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/transactions/summary/by-category',
+            query: {
+                start_date: data.startDate,
+                end_date: data.endDate,
+                account_id: data.accountId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Transaction
+     * Get transaction by ID.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns TransactionPublic Successful Response
+     * @throws ApiError
+     */
+    public static readTransaction(data: TransactionsReadTransactionData): CancelablePromise<TransactionsReadTransactionResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/transactions/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Transaction
+     * Update a transaction.
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns TransactionPublic Successful Response
+     * @throws ApiError
+     */
+    public static updateTransaction(data: TransactionsUpdateTransactionData): CancelablePromise<TransactionsUpdateTransactionResponse> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/v1/transactions/{id}',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Transaction
+     * Delete a transaction.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static deleteTransaction(data: TransactionsDeleteTransactionData): CancelablePromise<TransactionsDeleteTransactionResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/transactions/{id}',
+            path: {
+                id: data.id
+            },
             errors: {
                 422: 'Validation Error'
             }

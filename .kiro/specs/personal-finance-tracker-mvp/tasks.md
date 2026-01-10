@@ -52,7 +52,7 @@ This implementation plan breaks down the personal finance tracker MVP into discr
   - **Property 9: Category Creation and Uniqueness**
   - **Validates: Requirements 2.3, 5.4**
 
-- [ ] 5. Checkpoint - Ensure basic models and endpoints work
+- [x] 5. Checkpoint - Ensure basic models and endpoints work
   - Ensure all tests pass, ask the user if questions arise.
 
 - [x] 6. Create API endpoints for transaction management
@@ -110,10 +110,10 @@ This implementation plan breaks down the personal finance tracker MVP into discr
   - **Property 29: Comprehensive Error Handling**
   - **Validates: Requirements 1.5, 7.1, 7.2, 7.4, 7.5**
 
-- [ ] 10. Checkpoint - Ensure backend API is complete
+- [x] 10. Checkpoint - Ensure backend API is complete
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 11. Create frontend models and API client
+- [x] 11. Create frontend models and API client
   - Generate TypeScript client from OpenAPI spec
   - Create TypeScript interfaces for Account, Category, Transaction
   - Add utility functions for currency formatting and date handling
