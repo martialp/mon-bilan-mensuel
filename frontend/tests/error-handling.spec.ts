@@ -244,9 +244,17 @@ test.describe("API Error Handling and User Feedback", () => {
       await expect(page.getByText("Account created successfully")).toBeVisible()
       await expect(page.getByRole("dialog")).not.toBeVisible()
       
-      // Edit the account
+      // Wait for the table to update, then navigate to find the account
+      await page.waitForTimeout(500)
+      
+      const lastPageButton = page.getByRole("button", { name: "Go to last page" })
+      if (await lastPageButton.isEnabled()) {
+        await lastPageButton.click()
+      }
+      
+      // Edit the account (last button in the row is the actions menu)
       const accountRow = page.getByRole("row").filter({ hasText: accountName })
-      await accountRow.getByRole("button").click()
+      await accountRow.getByRole("button").last().click()
       await page.getByRole("menuitem", { name: "Edit Account" }).click()
       
       // Update the name
@@ -270,9 +278,17 @@ test.describe("API Error Handling and User Feedback", () => {
       await expect(page.getByText("Account created successfully")).toBeVisible()
       await expect(page.getByRole("dialog")).not.toBeVisible()
       
-      // Delete the account
+      // Wait for the table to update, then navigate to find the account
+      await page.waitForTimeout(500)
+      
+      const lastPageButton = page.getByRole("button", { name: "Go to last page" })
+      if (await lastPageButton.isEnabled()) {
+        await lastPageButton.click()
+      }
+      
+      // Delete the account (last button in the row is the actions menu)
       const accountRow = page.getByRole("row").filter({ hasText: accountName })
-      await accountRow.getByRole("button").click()
+      await accountRow.getByRole("button").last().click()
       await page.getByRole("menuitem", { name: "Delete Account" }).click()
       await page.getByRole("button", { name: "Delete" }).click()
       
@@ -307,6 +323,12 @@ test.describe("API Error Handling and User Feedback", () => {
       
       await expect(page.getByText("Category created successfully")).toBeVisible()
       await expect(page.getByRole("dialog")).not.toBeVisible()
+      
+      // Navigate to find the category (sorted by name)
+      const lastPageButton = page.getByRole("button", { name: "Go to last page" })
+      if (await lastPageButton.isEnabled()) {
+        await lastPageButton.click()
+      }
       
       // Delete the category
       const categoryRow = page.getByRole("row").filter({ hasText: categoryName })

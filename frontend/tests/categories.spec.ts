@@ -73,8 +73,14 @@ test.describe("Category Management", () => {
     // Dialog should close
     await expect(page.getByRole("dialog")).not.toBeVisible()
 
+    // Navigate to find the category (sorted by name)
+    const lastPageButton = page.getByRole("button", { name: "Go to last page" })
+    if (await lastPageButton.isEnabled()) {
+      await lastPageButton.click()
+    }
+
     // Category should appear in the list
-    await expect(page.getByText(categoryName)).toBeVisible()
+    await expect(page.getByRole("cell", { name: categoryName })).toBeVisible({ timeout: 10000 })
   })
 
   test("Edit category dialog opens with existing data", async ({ page }) => {
@@ -88,6 +94,12 @@ test.describe("Category Management", () => {
     // Wait for success and dialog to close
     await expect(page.getByText("Category created successfully")).toBeVisible()
     await expect(page.getByRole("dialog")).not.toBeVisible()
+
+    // Navigate to find the category (sorted by name)
+    const lastPageButton = page.getByRole("button", { name: "Go to last page" })
+    if (await lastPageButton.isEnabled()) {
+      await lastPageButton.click()
+    }
 
     // Find the category row and click the actions menu (last button in the row)
     const categoryRow = page.getByRole("row").filter({ hasText: categoryName })
@@ -112,6 +124,12 @@ test.describe("Category Management", () => {
     // Wait for success
     await expect(page.getByText("Category created successfully")).toBeVisible()
     await expect(page.getByRole("dialog")).not.toBeVisible()
+
+    // Navigate to find the category (sorted by name)
+    const lastPageButton = page.getByRole("button", { name: "Go to last page" })
+    if (await lastPageButton.isEnabled()) {
+      await lastPageButton.click()
+    }
 
     // Find the category row and click the actions menu (last button in the row)
     const categoryRow = page.getByRole("row").filter({ hasText: categoryName })

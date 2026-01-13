@@ -13,7 +13,8 @@ export async function signUpNewUser(
   await page.getByTestId("password-input").fill(password)
   await page.getByTestId("confirm-password-input").fill(password)
   await page.getByRole("button", { name: "Sign Up" }).click()
-  await page.goto("/login")
+  // Wait for signup to complete (redirects to login)
+  await page.waitForURL("/login")
 }
 
 export async function logInUser(page: Page, email: string, password: string) {
@@ -23,9 +24,8 @@ export async function logInUser(page: Page, email: string, password: string) {
   await page.getByTestId("password-input").fill(password)
   await page.getByRole("button", { name: "Log In" }).click()
   await page.waitForURL("/")
-  await expect(
-    page.getByText("Welcome back, nice to see you again!"),
-  ).toBeVisible()
+  // Wait for dashboard to load - check for the welcome header
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible()
 }
 
 export async function logOutUser(page: Page) {

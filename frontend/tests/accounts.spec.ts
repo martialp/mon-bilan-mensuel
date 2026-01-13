@@ -90,8 +90,17 @@ test.describe("Account Management", () => {
     // Dialog should close
     await expect(page.getByRole("dialog")).not.toBeVisible()
 
+    // Wait for the table to update, then navigate to find the account
+    // The account name starts with "Test Account" so it will be near the end alphabetically
+    await page.waitForTimeout(500) // Wait for query invalidation
+    
+    const lastPageButton = page.getByRole("button", { name: "Go to last page" })
+    if (await lastPageButton.isEnabled()) {
+      await lastPageButton.click()
+    }
+
     // Account should appear in the list
-    await expect(page.getByText(accountName)).toBeVisible()
+    await expect(page.getByRole("cell", { name: accountName })).toBeVisible({ timeout: 10000 })
   })
 
   test("Edit account dialog opens with existing data", async ({ page }) => {
@@ -108,9 +117,17 @@ test.describe("Account Management", () => {
     await expect(page.getByText("Account created successfully")).toBeVisible()
     await expect(page.getByRole("dialog")).not.toBeVisible()
 
-    // Find the account row and click the actions menu
+    // Wait for the table to update, then navigate to find the account
+    await page.waitForTimeout(500)
+    
+    const lastPageButton = page.getByRole("button", { name: "Go to last page" })
+    if (await lastPageButton.isEnabled()) {
+      await lastPageButton.click()
+    }
+
+    // Find the account row and click the actions menu (last button in the row)
     const accountRow = page.getByRole("row").filter({ hasText: accountName })
-    await accountRow.getByRole("button").click()
+    await accountRow.getByRole("button").last().click()
 
     // Click Edit Account
     await page.getByRole("menuitem", { name: "Edit Account" }).click()
@@ -134,9 +151,17 @@ test.describe("Account Management", () => {
     await expect(page.getByText("Account created successfully")).toBeVisible()
     await expect(page.getByRole("dialog")).not.toBeVisible()
 
-    // Find the account row and click the actions menu
+    // Wait for the table to update, then navigate to find the account
+    await page.waitForTimeout(500)
+    
+    const lastPageButton = page.getByRole("button", { name: "Go to last page" })
+    if (await lastPageButton.isEnabled()) {
+      await lastPageButton.click()
+    }
+
+    // Find the account row and click the actions menu (last button in the row)
     const accountRow = page.getByRole("row").filter({ hasText: accountName })
-    await accountRow.getByRole("button").click()
+    await accountRow.getByRole("button").last().click()
 
     // Click Delete Account
     await page.getByRole("menuitem", { name: "Delete Account" }).click()

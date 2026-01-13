@@ -29,7 +29,7 @@ test.describe("Transaction Management", () => {
     page,
   }) => {
     // Filters section should be visible
-    await expect(page.getByText("Filters")).toBeVisible()
+    await expect(page.getByRole("heading", { name: "Filters" })).toBeVisible()
 
     // All filter dropdowns should be visible
     await expect(page.getByLabel("Account")).toBeVisible()
@@ -131,6 +131,9 @@ test.describe("Transaction Management", () => {
   })
 
   test("Empty state or table is shown", async ({ page }) => {
+    // Wait for the page to load
+    await page.waitForLoadState("networkidle")
+    
     // Either empty state or table should be visible
     const emptyStateText = page.getByText("No transactions found")
     const transactionsTable = page.getByRole("table")

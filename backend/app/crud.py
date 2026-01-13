@@ -108,8 +108,8 @@ def get_account(*, session: Session, account_id: uuid.UUID) -> Account | None:
 
 
 def get_accounts(*, session: Session, skip: int = 0, limit: int = 100) -> list[Account]:
-    """Get all accounts with pagination."""
-    statement = select(Account).offset(skip).limit(limit)
+    """Get all accounts with pagination, ordered by name."""
+    statement = select(Account).order_by(Account.name).offset(skip).limit(limit)
     return list(session.exec(statement).all())
 
 
@@ -163,8 +163,8 @@ def get_category_by_name(*, session: Session, name: str) -> Category | None:
 
 
 def get_categories(*, session: Session, skip: int = 0, limit: int = 100) -> list[Category]:
-    """Get all categories with pagination."""
-    statement = select(Category).offset(skip).limit(limit)
+    """Get all categories with pagination, ordered by name."""
+    statement = select(Category).order_by(Category.name).offset(skip).limit(limit)
     return list(session.exec(statement).all())
 
 
@@ -202,26 +202,26 @@ def get_transaction(*, session: Session, transaction_id: uuid.UUID) -> Transacti
 
 
 def get_transactions(*, session: Session, skip: int = 0, limit: int = 100) -> list[Transaction]:
-    """Get all transactions with pagination."""
-    statement = select(Transaction).offset(skip).limit(limit)
+    """Get all transactions with pagination, ordered by date descending."""
+    statement = select(Transaction).order_by(Transaction.date_transaction.desc()).offset(skip).limit(limit)
     return list(session.exec(statement).all())
 
 
 def get_transactions_by_account(*, session: Session, account_id: uuid.UUID, skip: int = 0, limit: int = 100) -> list[Transaction]:
-    """Get transactions for a specific account."""
-    statement = select(Transaction).where(Transaction.account_id == account_id).offset(skip).limit(limit)
+    """Get transactions for a specific account, ordered by date descending."""
+    statement = select(Transaction).where(Transaction.account_id == account_id).order_by(Transaction.date_transaction.desc()).offset(skip).limit(limit)
     return list(session.exec(statement).all())
 
 
 def get_transactions_by_category(*, session: Session, category_id: uuid.UUID, skip: int = 0, limit: int = 100) -> list[Transaction]:
-    """Get transactions for a specific category."""
-    statement = select(Transaction).where(Transaction.category_id == category_id).offset(skip).limit(limit)
+    """Get transactions for a specific category, ordered by date descending."""
+    statement = select(Transaction).where(Transaction.category_id == category_id).order_by(Transaction.date_transaction.desc()).offset(skip).limit(limit)
     return list(session.exec(statement).all())
 
 
 def get_uncategorized_transactions(*, session: Session, skip: int = 0, limit: int = 100) -> list[Transaction]:
-    """Get transactions that need categorization (category_id is NULL)."""
-    statement = select(Transaction).where(Transaction.category_id.is_(None)).offset(skip).limit(limit)
+    """Get transactions that need categorization (category_id is NULL), ordered by date descending."""
+    statement = select(Transaction).where(Transaction.category_id.is_(None)).order_by(Transaction.date_transaction.desc()).offset(skip).limit(limit)
     return list(session.exec(statement).all())
 
 

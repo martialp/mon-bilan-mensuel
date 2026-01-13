@@ -39,10 +39,14 @@ const ERROR_MESSAGES: Record<string, string> = {
   "Account has associated transactions":
     "This account has transactions. Please delete or reassign them first.",
 
+  // User errors
+  "user with this email already exists":
+    "The user with this email already exists in the system.",
+
   // Category errors
   "Category not found": "The category you're looking for doesn't exist.",
   "Category already exists": "A category with this name already exists.",
-  "already exists": "A category with this name already exists.",
+  "category with name": "A category with this name already exists.",
   "Cannot delete category with transactions":
     "This category has transactions. Please reassign them first.",
   "Category has associated transactions":
