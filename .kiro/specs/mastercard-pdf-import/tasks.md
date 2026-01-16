@@ -28,8 +28,8 @@ This plan implements the Mastercard PDF import feature following the existing Fa
     - **Property 1: File Validation Boundary**
     - **Validates: Requirements 1.1, 1.2, 1.4**
 
-- [ ] 4. Implement Statement Parser Service
-  - [ ] 4.1 Create `backend/app/services/statement_parser.py`
+- [x] 4. Implement Statement Parser Service
+  - [x] 4.1 Create `backend/app/services/statement_parser.py`
     - Implement `ParsedTransaction` dataclass
     - Implement `StatementParser.parse_date()` for Desjardins French date formats
     - Implement `StatementParser.parse_amount()` for amount and type detection
@@ -37,19 +37,19 @@ This plan implements the Mastercard PDF import feature following the existing Fa
     - Implement `StatementParser.parse_transactions()` to process all raw transactions
     - _Requirements: 2.2, 2.4, 2.5, 3.2, 3.3, 3.5_
 
-  - [ ] 4.2 Write property test for date parsing round-trip
+  - [x] 4.2 Write property test for date parsing round-trip
     - **Property 4: Date Parsing Round-Trip**
     - **Validates: Requirements 2.5**
 
-  - [ ] 4.3 Write property test for currency conversion round-trip
+  - [x] 4.3 Write property test for currency conversion round-trip
     - **Property 5: Currency Conversion Round-Trip**
     - **Validates: Requirements 3.2**
 
-  - [ ] 4.4 Write property test for amount sign classification
+  - [x] 4.4 Write property test for amount sign classification
     - **Property 3: Amount Sign Classification**
     - **Validates: Requirements 2.4, 3.3**
 
-  - [ ] 4.5 Write property test for description normalization idempotence
+  - [x] 4.5 Write property test for description normalization idempotence
     - **Property 6: Description Normalization Idempotence**
     - **Validates: Requirements 3.5**
 
