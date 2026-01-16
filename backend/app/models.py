@@ -27,6 +27,13 @@ class TransactionStatus(str, Enum):
     MANUAL = "manual"
 
 
+class ImportStatus(str, Enum):
+    PENDING = "pending"  # Awaiting user confirmation
+    COMPLETED = "completed"  # Successfully imported
+    REJECTED = "rejected"  # User rejected the import
+    FAILED = "failed"  # Import failed with error
+
+
 # Shared properties
 class UserBase(SQLModel):
     email: EmailStr = Field(unique=True, index=True, max_length=255)
@@ -232,14 +239,14 @@ class Transaction(TransactionBase, table=True):
     category_id: uuid.UUID | None = Field(foreign_key="category.id", nullable=True)
     status: TransactionStatus = Field(default=TransactionStatus.MANUAL)
     created_at: datetime = Field(default_factory=datetime.utcnow)
-    
+
     account: Account = Relationship(back_populates="transactions")
     category: Category | None = Relationship(back_populates="transactions")
-    
+
     __table_args__ = (
         UniqueConstraint(
-            "account_id", "date_transaction", "description", 
-            "amount_cents", "statement_date", 
+            "account_id", "date_transaction", "description",
+            "amount_cents", "statement_date",
             name="unique_transaction"
         ),
     )
@@ -258,3 +265,70 @@ class TransactionPublic(TransactionBase):
 class TransactionsPublic(SQLModel):
     data: list[TransactionPublic]
     count: int
+
+
+# Import Session models
+class ImportSessionBase(SQLModel):
+    file_name: str = Field(max_length=255)
+    account_id: uuid.UUID = Field(foreign_key="account.id")
+    status: ImportStatus = Field(default=ImportStatus.PENDING)
+    transaction_count: int = Field(default=0)
+    statement_date: date | None = None
+    statement_total_cents: int | None = None
+    calculated_total_cents: int | None = None
+    error_message: str | None = Field(default=None, max_length=1000)
+
+
+class ImportSession(ImportSessionBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    completed_at: datetime | None = None
+
+    account: Account = Relationship()
+
+
+class ImportSessionCreate(SQLModel):
+    file_name: str = Field(max_length=255)
+    account_id: uuid.UUID
+    statement_date: date | None = None
+    statement_total_cents: int | None = None
+    calculated_total_cents: int | None = None
+
+
+class ImportSessionPublic(ImportSessionBase):
+    id: uuid.UUID
+    created_at: datetime
+    completed_at: datetime | None
+
+
+class ImportSessionsPublic(SQLModel):
+    data: list[ImportSessionPublic]
+    count: int
+
+
+# Preview models for API responses
+class TransactionPreview(SQLModel):
+    """Single transaction in import preview."""
+    date_transaction: date
+    description: str
+    amount_cents: int
+    type: TransactionType
+
+
+class ImportPreviewPublic(SQLModel):
+    """Preview response after PDF extraction."""
+    import_id: uuid.UUID
+    file_name: str
+    statement_date: date | None
+    statement_total_cents: int | None
+    calculated_total_cents: int
+    totals_match: bool
+    transactions: list[TransactionPreview]
+    warnings: list[str]
+
+
+class ImportResultPublic(SQLModel):
+    """Result after confirming import."""
+    import_session_id: uuid.UUID
+    transactions_imported: int
+    success: bool

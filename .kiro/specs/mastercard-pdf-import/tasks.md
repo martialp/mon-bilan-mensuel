@@ -6,7 +6,7 @@ This plan implements the Mastercard PDF import feature following the existing Fa
 
 ## Tasks
 
-- [ ] 1. Create data models for import functionality
+- [x] 1. Create data models for import functionality
   - Add `ImportStatus` enum and `ImportSession` model to `backend/app/models.py`
   - Add `ImportSessionCreate`, `ImportSessionPublic`, `ImportSessionsPublic` schemas
   - Add `TransactionPreview`, `ImportPreviewPublic`, `ImportResultPublic` schemas
