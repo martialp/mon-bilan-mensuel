@@ -4,14 +4,17 @@
 
 This feature enables importing transactions from Mastercard PDF statements downloaded from Desjardins (AccèsD) platform. The system extracts transaction data from PDF files and integrates them into the existing transaction management workflow. This builds upon the existing MVP's manual transaction entry capabilities.
 
+**Reference PDF**: A sample Desjardins Mastercard statement is available at `#[[file:############8000-janvier-2025.pdf]]` for testing and validation purposes.
+
 ## Glossary
 
-- **PDF_Extractor**: Component that extracts transaction data from Mastercard PDF statements
+- **PDF_Extractor**: Component that extracts transaction data from Mastercard PDF statements using pdfplumber library
 - **Mastercard_Statement**: A PDF document downloaded from Desjardins AccèsD containing credit card transactions
-- **Statement_Parser**: Component that parses PDFs into structured transaction data
+- **Statement_Parser**: Component that parses PDFs into structured transaction data using pdfplumber's table extraction
 - **Transaction_Importer**: Component that validates and imports extracted transactions into the database
 - **Import_Session**: A record tracking a single PDF import operation including file metadata and results
 - **Extraction_Result**: Structured data containing all transactions extracted from a single PDF statement
+- **pdfplumber**: Python library for extracting text and tables from PDF files
 
 ## Requirements
 
@@ -34,12 +37,12 @@ This feature enables importing transactions from Mastercard PDF statements downl
 
 #### Acceptance Criteria
 
-1. WHEN a valid PDF is uploaded, THE PDF_Extractor SHALL process the PDF to extract transaction data
-2. WHEN processing the PDF, THE Statement_Parser SHALL extract transaction date, description, and amount for each transaction
-3. WHEN extracting transactions, THE Statement_Parser SHALL identify the statement date from the PDF
+1. WHEN a valid PDF is uploaded, THE PDF_Extractor SHALL use pdfplumber to process the PDF and extract transaction data
+2. WHEN processing the PDF, THE Statement_Parser SHALL use pdfplumber's table extraction to identify transaction date, description, and amount for each transaction
+3. WHEN extracting transactions, THE Statement_Parser SHALL identify the statement date from the PDF header text
 4. WHEN extracting amounts, THE Statement_Parser SHALL correctly identify positive amounts (payments/credits) and negative amounts (purchases/debits)
-5. WHEN extracting dates, THE Statement_Parser SHALL parse dates in the Desjardins format and convert to ISO date format
-6. IF the PDF_Extractor cannot extract data from the PDF, THEN THE System SHALL return an error with details about the extraction failure
+5. WHEN extracting dates, THE Statement_Parser SHALL parse dates in the Desjardins format (e.g., "15 JAN", "15 JANV") and convert to ISO date format
+6. IF the PDF_Extractor cannot extract data from the PDF using pdfplumber, THEN THE System SHALL return an error with details about the extraction failure
 7. WHEN extraction completes, THE System SHALL return a structured list of all extracted transactions for user review
 
 ### Requirement 3: Transaction Data Validation and Transformation
