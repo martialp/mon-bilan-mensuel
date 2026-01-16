@@ -12,19 +12,19 @@ This plan implements the Mastercard PDF import feature following the existing Fa
   - Add `TransactionPreview`, `ImportPreviewPublic`, `ImportResultPublic` schemas
   - _Requirements: 5.1, 5.2, 5.3, 4.1, 4.2_
 
-- [ ] 2. Create database migration for ImportSession table
+- [x] 2. Create database migration for ImportSession table
   - Run `alembic revision --autogenerate -m "Add ImportSession model"`
   - Apply migration with `alembic upgrade head`
   - _Requirements: 5.1_
 
-- [ ] 3. Implement PDF Extractor Service
-  - [ ] 3.1 Create `backend/app/services/__init__.py` and `backend/app/services/pdf_extractor.py`
+- [x] 3. Implement PDF Extractor Service
+  - [x] 3.1 Create `backend/app/services/__init__.py` and `backend/app/services/pdf_extractor.py`
     - Implement `RawTransaction` and `ExtractionResult` dataclasses
     - Implement `PDFExtractor.validate_file()` for PDF format and size validation
     - Implement `PDFExtractor.extract()` using pdfplumber table extraction
     - _Requirements: 1.1, 1.2, 1.6, 2.1, 2.3_
 
-  - [ ] 3.2 Write property test for file validation
+  - [x] 3.2 Write property test for file validation
     - **Property 1: File Validation Boundary**
     - **Validates: Requirements 1.1, 1.2, 1.4**
 
