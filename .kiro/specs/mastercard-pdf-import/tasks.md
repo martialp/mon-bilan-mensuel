@@ -53,22 +53,22 @@ This plan implements the Mastercard PDF import feature following the existing Fa
     - **Property 6: Description Normalization Idempotence**
     - **Validates: Requirements 3.5**
 
-- [ ] 5. Implement Transaction Importer Service
-  - [ ] 5.1 Create `backend/app/services/transaction_importer.py`
+- [x] 5. Implement Transaction Importer Service
+  - [x] 5.1 Create `backend/app/services/transaction_importer.py`
     - Implement `ImportResult` dataclass
     - Implement `TransactionImporter.validate_transaction()` for field validation
     - Implement `TransactionImporter.import_transactions()` with atomic persistence
     - _Requirements: 3.1, 3.4, 3.6, 4.8, 5.1, 5.4, 6.3_
 
-  - [ ] 5.2 Write property test for transaction field completeness
+  - [x] 5.2 Write property test for transaction field completeness
     - **Property 2: Transaction Field Completeness**
     - **Validates: Requirements 2.2, 3.1**
 
-  - [ ] 5.3 Write property test for statement date association
+  - [x] 5.3 Write property test for statement date association
     - **Property 7: Statement Date Association**
     - **Validates: Requirements 3.6**
 
-  - [ ] 5.4 Write property test for data consistency on failure
+  - [x] 5.4 Write property test for data consistency on failure
     - **Property 12: Data Consistency on Failure**
     - **Validates: Requirements 6.3**
 
