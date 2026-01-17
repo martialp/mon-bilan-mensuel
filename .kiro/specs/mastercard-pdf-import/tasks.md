@@ -105,17 +105,17 @@ This plan implements the Mastercard PDF import feature following the existing Fa
     - **Property 9: Total Validation Consistency**
     - **Validates: Requirements 4.5, 4.6**
 
-- [ ] 9. Implement import persistence logic
-  - [ ] 9.1 Add temporary file storage handling in upload endpoint
+- [x] 9. Implement import persistence logic
+  - [x] 9.1 Add temporary file storage handling in upload endpoint
     - Store uploaded PDF temporarily during preview phase
     - Clean up temporary files after confirm/reject
     - _Requirements: 1.3, 4.9_
 
-  - [ ] 9.2 Write property test for import persistence atomicity
+  - [x] 9.2 Write property test for import persistence atomicity
     - **Property 10: Import Persistence Atomicity**
     - **Validates: Requirements 4.8, 4.9**
 
-  - [ ] 9.3 Write property test for import session tracking
+  - [x] 9.3 Write property test for import session tracking
     - **Property 11: Import Session Tracking**
     - **Validates: Requirements 5.1, 5.3, 5.4**
 

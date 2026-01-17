@@ -1,5 +1,7 @@
 """Import API routes for Mastercard PDF statement imports."""
 
+import atexit
+import os
 import tempfile
 import uuid
 from datetime import datetime
@@ -37,6 +39,28 @@ router = APIRouter(prefix="/imports", tags=["imports"])
 _pending_imports: dict[uuid.UUID, dict[str, Any]] = {}
 
 
+def _cleanup_temp_file(import_id: uuid.UUID) -> None:
+    """Clean up temporary PDF file for a given import session."""
+    pending_data = _pending_imports.get(import_id)
+    if pending_data and "temp_file_path" in pending_data:
+        temp_path = pending_data["temp_file_path"]
+        try:
+            if temp_path and os.path.exists(temp_path):
+                os.unlink(temp_path)
+        except Exception:
+            pass  # Best effort cleanup
+
+
+def _cleanup_all_temp_files() -> None:
+    """Clean up all temporary files on application shutdown."""
+    for import_id in list(_pending_imports.keys()):
+        _cleanup_temp_file(import_id)
+
+
+# Register cleanup function for application shutdown
+atexit.register(_cleanup_all_temp_files)
+
+
 @router.post("/upload", response_model=ImportPreviewPublic)
 async def upload_pdf(
     session: SessionDep,
@@ -64,7 +88,8 @@ async def upload_pdf(
             detail="Only PDF files are supported"
         )
     
-    # Save uploaded file to temporary location
+    # Save uploaded file to temporary location (kept during preview phase)
+    tmp_path: Path | None = None
     try:
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
             content = await file.read()
@@ -83,6 +108,9 @@ async def upload_pdf(
         # Validate file
         is_valid, error_msg = extractor.validate_file(tmp_path)
         if not is_valid:
+            # Clean up temp file on validation failure
+            if tmp_path and tmp_path.exists():
+                tmp_path.unlink()
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=error_msg or "Invalid PDF file"
@@ -92,6 +120,9 @@ async def upload_pdf(
         extraction_result = extractor.extract(tmp_path)
         
         if not extraction_result.success:
+            # Clean up temp file on extraction failure
+            if tmp_path and tmp_path.exists():
+                tmp_path.unlink()
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail="; ".join(extraction_result.errors) or "Failed to extract transactions from PDF"
@@ -113,12 +144,18 @@ async def upload_pdf(
                 statement_date
             )
         except ValueError as e:
+            # Clean up temp file on parse failure
+            if tmp_path and tmp_path.exists():
+                tmp_path.unlink()
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail=f"Failed to parse transactions: {str(e)}"
             )
         
         if not parsed_transactions:
+            # Clean up temp file when no transactions found
+            if tmp_path and tmp_path.exists():
+                tmp_path.unlink()
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail="No valid transactions found in PDF"
@@ -158,12 +195,13 @@ async def upload_pdf(
         session.commit()
         session.refresh(import_session)
         
-        # Store parsed transactions for later confirmation
+        # Store parsed transactions and temp file path for later confirmation
         _pending_imports[import_session.id] = {
             "transactions": parsed_transactions,
             "account_id": account_id,
             "source_file": file.filename or "unknown.pdf",
             "statement_date": statement_date,
+            "temp_file_path": str(tmp_path),  # Store temp file path for cleanup
         }
         
         # Build preview response
@@ -188,12 +226,17 @@ async def upload_pdf(
             warnings=warnings,
         )
         
-    finally:
-        # Clean up temporary file
-        try:
+    except HTTPException:
+        # Re-raise HTTP exceptions (already handled cleanup above)
+        raise
+    except Exception as e:
+        # Clean up temp file on unexpected error
+        if tmp_path and tmp_path.exists():
             tmp_path.unlink()
-        except Exception:
-            pass
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Unexpected error during PDF processing: {str(e)}"
+        )
 
 
 @router.post("/{import_id}/confirm", response_model=ImportResultPublic)
@@ -253,6 +296,9 @@ def confirm_import(
         # Commit all changes atomically
         session.commit()
         
+        # Clean up temporary file after successful import
+        _cleanup_temp_file(import_id)
+        
         # Clean up pending data
         del _pending_imports[import_id]
         
@@ -271,6 +317,13 @@ def confirm_import(
         import_session.completed_at = datetime.utcnow()
         session.add(import_session)
         session.commit()
+        
+        # Clean up temporary file on failure
+        _cleanup_temp_file(import_id)
+        
+        # Clean up pending data on failure
+        if import_id in _pending_imports:
+            del _pending_imports[import_id]
         
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -305,6 +358,9 @@ def reject_import(
     import_session.completed_at = datetime.utcnow()
     session.add(import_session)
     session.commit()
+    
+    # Clean up temporary file after rejection
+    _cleanup_temp_file(import_id)
     
     # Clean up pending data
     if import_id in _pending_imports:
