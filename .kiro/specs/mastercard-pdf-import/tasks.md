@@ -122,12 +122,12 @@ This plan implements the Mastercard PDF import feature following the existing Fa
 - [ ] 10. Checkpoint - Ensure all backend tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 11. Add error handling and edge cases
-  - [ ] 11.1 Add error classes to `backend/app/api/errors.py`
+- [x] 11. Add error handling and edge cases
+  - [x] 11.1 Add error classes to `backend/app/api/errors.py`
     - Add import-specific error messages and helper functions
     - _Requirements: 6.1, 6.2, 6.4, 6.5_
 
-  - [ ] 11.2 Implement partial extraction handling
+  - [x] 11.2 Implement partial extraction handling
     - Return successfully extracted transactions when some fail
     - Include warnings in preview response
     - _Requirements: 6.4_

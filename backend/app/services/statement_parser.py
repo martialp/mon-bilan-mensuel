@@ -1,7 +1,7 @@
 """Statement Parser Service for Desjardins Mastercard statements."""
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date
 
 from app.models import TransactionType
@@ -16,6 +16,15 @@ class ParsedTransaction:
     description: str
     amount_cents: int
     transaction_type: TransactionType
+
+
+@dataclass
+class ParseResult:
+    """Result of parsing transactions with partial failure support."""
+
+    transactions: list[ParsedTransaction] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+    failed_count: int = 0
 
 
 class StatementParser:
@@ -216,3 +225,56 @@ class StatementParser:
             )
 
         return parsed
+
+    def parse_transactions_partial(
+        self,
+        raw_transactions: list[RawTransaction],
+        statement_date: date,
+    ) -> ParseResult:
+        """
+        Parse all raw transactions with partial failure support.
+
+        Unlike parse_transactions(), this method continues processing
+        even when individual transactions fail to parse, returning
+        successfully parsed transactions along with warnings.
+
+        Args:
+            raw_transactions: List of raw transactions from PDF extraction
+            statement_date: The statement date to use for year inference
+
+        Returns:
+            ParseResult containing successfully parsed transactions,
+            warnings for failed transactions, and count of failures.
+        """
+        result = ParseResult()
+        statement_year = statement_date.year
+
+        for i, raw in enumerate(raw_transactions):
+            try:
+                # Parse date
+                transaction_date = self.parse_date(raw.date_str, statement_year)
+
+                # Parse amount and determine type
+                amount_cents, transaction_type = self.parse_amount(raw.amount_str)
+
+                # Normalize description
+                description = self.normalize_description(raw.description)
+
+                result.transactions.append(
+                    ParsedTransaction(
+                        date_transaction=transaction_date,
+                        description=description,
+                        amount_cents=amount_cents,
+                        transaction_type=transaction_type,
+                    )
+                )
+            except ValueError as e:
+                result.failed_count += 1
+                # Create a truncated description for the warning
+                desc_preview = raw.description[:30] + "..." if len(raw.description) > 30 else raw.description
+                result.warnings.append(
+                    f"Transaction {i + 1} could not be parsed: {str(e)} "
+                    f"(date: '{raw.date_str}', desc: '{desc_preview}')"
+                )
+
+        return result

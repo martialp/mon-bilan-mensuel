@@ -12,7 +12,16 @@ from fastapi import APIRouter, File, HTTPException, Query, UploadFile, status
 from sqlmodel import func, select
 
 from app.api.deps import SessionDep
-from app.api.errors import raise_not_found
+from app.api.errors import (
+    raise_not_found,
+    raise_import_invalid_file_type,
+    raise_import_corrupted_pdf,
+    raise_import_extraction_failed,
+    raise_import_no_transactions,
+    raise_import_already_processed,
+    raise_import_preview_expired,
+    raise_import_failed,
+)
 from app.models import (
     Account,
     ImportPreviewPublic,
@@ -30,7 +39,7 @@ from app.models import (
     TransactionType,
 )
 from app.services.pdf_extractor import PDFExtractor
-from app.services.statement_parser import StatementParser
+from app.services.statement_parser import StatementParser, ParseResult
 
 router = APIRouter(prefix="/imports", tags=["imports"])
 
@@ -83,10 +92,7 @@ async def upload_pdf(
     
     # Validate file type
     if not file.filename or not file.filename.lower().endswith(".pdf"):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Only PDF files are supported"
-        )
+        raise_import_invalid_file_type()
     
     # Save uploaded file to temporary location (kept during preview phase)
     tmp_path: Path | None = None
@@ -96,10 +102,7 @@ async def upload_pdf(
             tmp_file.write(content)
             tmp_path = Path(tmp_file.name)
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to save uploaded file: {str(e)}"
-        )
+        raise_import_failed(f"Failed to save uploaded file: {str(e)}")
     
     try:
         # Extract data from PDF
@@ -111,10 +114,19 @@ async def upload_pdf(
             # Clean up temp file on validation failure
             if tmp_path and tmp_path.exists():
                 tmp_path.unlink()
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=error_msg or "Invalid PDF file"
-            )
+            # Determine specific error type
+            if error_msg and "limit" in error_msg.lower():
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=error_msg
+                )
+            elif error_msg and "read" in error_msg.lower():
+                raise_import_corrupted_pdf()
+            else:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=error_msg or "Invalid PDF file"
+                )
         
         # Extract transactions
         extraction_result = extractor.extract(tmp_path)
@@ -123,12 +135,9 @@ async def upload_pdf(
             # Clean up temp file on extraction failure
             if tmp_path and tmp_path.exists():
                 tmp_path.unlink()
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="; ".join(extraction_result.errors) or "Failed to extract transactions from PDF"
-            )
+            raise_import_extraction_failed("; ".join(extraction_result.errors) or "Unknown extraction error")
         
-        # Parse extracted transactions
+        # Parse extracted transactions with partial failure support
         parser = StatementParser()
         warnings: list[str] = []
         
@@ -138,28 +147,30 @@ async def upload_pdf(
             statement_date = datetime.utcnow().date()
             warnings.append("Could not extract statement date from PDF, using current date")
         
-        try:
-            parsed_transactions = parser.parse_transactions(
-                extraction_result.transactions,
-                statement_date
-            )
-        except ValueError as e:
-            # Clean up temp file on parse failure
-            if tmp_path and tmp_path.exists():
-                tmp_path.unlink()
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=f"Failed to parse transactions: {str(e)}"
+        # Use partial extraction to handle individual transaction failures gracefully
+        parse_result: ParseResult = parser.parse_transactions_partial(
+            extraction_result.transactions,
+            statement_date
+        )
+        
+        # Add any parsing warnings to the response
+        warnings.extend(parse_result.warnings)
+        
+        # Get successfully parsed transactions
+        parsed_transactions = parse_result.transactions
+        
+        # Add summary warning if some transactions failed
+        if parse_result.failed_count > 0:
+            warnings.append(
+                f"{parse_result.failed_count} transaction(s) could not be parsed and were skipped. "
+                f"{len(parsed_transactions)} transaction(s) extracted successfully."
             )
         
         if not parsed_transactions:
             # Clean up temp file when no transactions found
             if tmp_path and tmp_path.exists():
                 tmp_path.unlink()
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="No valid transactions found in PDF"
-            )
+            raise_import_no_transactions()
         
         # Calculate total from parsed transactions
         calculated_total_cents = sum(
@@ -233,10 +244,7 @@ async def upload_pdf(
         # Clean up temp file on unexpected error
         if tmp_path and tmp_path.exists():
             tmp_path.unlink()
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Unexpected error during PDF processing: {str(e)}"
-        )
+        raise_import_failed(f"Unexpected error during PDF processing: {str(e)}")
 
 
 @router.post("/{import_id}/confirm", response_model=ImportResultPublic)
@@ -256,18 +264,12 @@ def confirm_import(
     
     # Check status
     if import_session.status != ImportStatus.PENDING:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=f"Import has already been {import_session.status.value}"
-        )
+        raise_import_already_processed(import_session.status.value)
     
     # Get pending import data
     pending_data = _pending_imports.get(import_id)
     if not pending_data:
-        raise HTTPException(
-            status_code=status.HTTP_410_GONE,
-            detail="Import preview has expired. Please upload the PDF again."
-        )
+        raise_import_preview_expired()
     
     try:
         # Create all transactions
@@ -325,10 +327,7 @@ def confirm_import(
         if import_id in _pending_imports:
             del _pending_imports[import_id]
         
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to import transactions: {str(e)}"
-        )
+        raise_import_failed(f"Failed to import transactions: {str(e)}")
 
 
 @router.post("/{import_id}/reject", response_model=Message)
@@ -348,10 +347,7 @@ def reject_import(
     
     # Check status
     if import_session.status != ImportStatus.PENDING:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=f"Import has already been {import_session.status.value}"
-        )
+        raise_import_already_processed(import_session.status.value)
     
     # Update import session
     import_session.status = ImportStatus.REJECTED
