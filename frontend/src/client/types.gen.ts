@@ -56,6 +56,10 @@ export type AccountUpdate = {
     description?: (string | null);
 };
 
+export type Body_imports_upload_pdf = {
+    file: (Blob | File);
+};
+
 export type Body_login_login_access_token = {
     grant_type?: (string | null);
     username: string;
@@ -98,6 +102,50 @@ export type CategoryUpdate = {
 export type HTTPValidationError = {
     detail?: Array<ValidationError>;
 };
+
+/**
+ * Preview response after PDF extraction.
+ */
+export type ImportPreviewPublic = {
+    import_id: string;
+    file_name: string;
+    statement_date: (string | null);
+    statement_total_cents: (number | null);
+    calculated_total_cents: number;
+    totals_match: boolean;
+    transactions: Array<TransactionPreview>;
+    warnings: Array<(string)>;
+};
+
+/**
+ * Result after confirming import.
+ */
+export type ImportResultPublic = {
+    import_session_id: string;
+    transactions_imported: number;
+    success: boolean;
+};
+
+export type ImportSessionPublic = {
+    file_name: string;
+    account_id: string;
+    status?: ImportStatus;
+    transaction_count?: number;
+    statement_date?: (string | null);
+    statement_total_cents?: (number | null);
+    calculated_total_cents?: (number | null);
+    error_message?: (string | null);
+    id: string;
+    created_at: string;
+    completed_at: (string | null);
+};
+
+export type ImportSessionsPublic = {
+    data: Array<ImportSessionPublic>;
+    count: number;
+};
+
+export type ImportStatus = 'pending' | 'completed' | 'rejected' | 'failed';
 
 export type ItemCreate = {
     title: string;
@@ -183,6 +231,16 @@ export type TransactionCreate = {
     statement_date?: (string | null);
     account_id: string;
     category_id?: (string | null);
+};
+
+/**
+ * Single transaction in import preview.
+ */
+export type TransactionPreview = {
+    date_transaction: string;
+    description: string;
+    amount_cents: number;
+    type: TransactionType;
 };
 
 export type TransactionPublic = {
@@ -385,6 +443,49 @@ export type CategoriesDeleteCategoryData = {
 };
 
 export type CategoriesDeleteCategoryResponse = (Message);
+
+export type ImportsUploadPdfData = {
+    /**
+     * Target account ID for imported transactions
+     */
+    accountId: string;
+    formData: Body_imports_upload_pdf;
+};
+
+export type ImportsUploadPdfResponse = (ImportPreviewPublic);
+
+export type ImportsConfirmImportData = {
+    importId: string;
+};
+
+export type ImportsConfirmImportResponse = (ImportResultPublic);
+
+export type ImportsRejectImportData = {
+    importId: string;
+};
+
+export type ImportsRejectImportResponse = (Message);
+
+export type ImportsListImportsData = {
+    /**
+     * Filter by account ID
+     */
+    accountId?: (string | null);
+    limit?: number;
+    skip?: number;
+    /**
+     * Filter by import status
+     */
+    status?: (ImportStatus | null);
+};
+
+export type ImportsListImportsResponse = (ImportSessionsPublic);
+
+export type ImportsGetImportData = {
+    importId: string;
+};
+
+export type ImportsGetImportResponse = (ImportSessionPublic);
 
 export type ItemsReadItemsData = {
     limit?: number;

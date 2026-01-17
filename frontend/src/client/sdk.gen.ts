@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { AccountsReadAccountsData, AccountsReadAccountsResponse, AccountsCreateAccountData, AccountsCreateAccountResponse, AccountsReadAccountData, AccountsReadAccountResponse, AccountsUpdateAccountData, AccountsUpdateAccountResponse, AccountsDeleteAccountData, AccountsDeleteAccountResponse, AnalysisGetSpendingByCategoryData, AnalysisGetSpendingByCategoryResponse, AnalysisGetSpendingTrendsData, AnalysisGetSpendingTrendsResponse, AnalysisGetAccountSummaryData, AnalysisGetAccountSummaryResponse, CategoriesReadCategoriesData, CategoriesReadCategoriesResponse, CategoriesCreateCategoryData, CategoriesCreateCategoryResponse, CategoriesReadCategoryData, CategoriesReadCategoryResponse, CategoriesUpdateCategoryData, CategoriesUpdateCategoryResponse, CategoriesDeleteCategoryData, CategoriesDeleteCategoryResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PrivateCreateUserData, PrivateCreateUserResponse, TransactionsReadTransactionsData, TransactionsReadTransactionsResponse, TransactionsCreateTransactionData, TransactionsCreateTransactionResponse, TransactionsReadUncategorizedTransactionsData, TransactionsReadUncategorizedTransactionsResponse, TransactionsReadPendingConfirmationTransactionsData, TransactionsReadPendingConfirmationTransactionsResponse, TransactionsReadTransactionData, TransactionsReadTransactionResponse, TransactionsUpdateTransactionData, TransactionsUpdateTransactionResponse, TransactionsDeleteTransactionData, TransactionsDeleteTransactionResponse, TransactionsCategorizeTransactionData, TransactionsCategorizeTransactionResponse, TransactionsConfirmTransactionData, TransactionsConfirmTransactionResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+import type { AccountsReadAccountsData, AccountsReadAccountsResponse, AccountsCreateAccountData, AccountsCreateAccountResponse, AccountsReadAccountData, AccountsReadAccountResponse, AccountsUpdateAccountData, AccountsUpdateAccountResponse, AccountsDeleteAccountData, AccountsDeleteAccountResponse, AnalysisGetSpendingByCategoryData, AnalysisGetSpendingByCategoryResponse, AnalysisGetSpendingTrendsData, AnalysisGetSpendingTrendsResponse, AnalysisGetAccountSummaryData, AnalysisGetAccountSummaryResponse, CategoriesReadCategoriesData, CategoriesReadCategoriesResponse, CategoriesCreateCategoryData, CategoriesCreateCategoryResponse, CategoriesReadCategoryData, CategoriesReadCategoryResponse, CategoriesUpdateCategoryData, CategoriesUpdateCategoryResponse, CategoriesDeleteCategoryData, CategoriesDeleteCategoryResponse, ImportsUploadPdfData, ImportsUploadPdfResponse, ImportsConfirmImportData, ImportsConfirmImportResponse, ImportsRejectImportData, ImportsRejectImportResponse, ImportsListImportsData, ImportsListImportsResponse, ImportsGetImportData, ImportsGetImportResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PrivateCreateUserData, PrivateCreateUserResponse, TransactionsReadTransactionsData, TransactionsReadTransactionsResponse, TransactionsCreateTransactionData, TransactionsCreateTransactionResponse, TransactionsReadUncategorizedTransactionsData, TransactionsReadUncategorizedTransactionsResponse, TransactionsReadPendingConfirmationTransactionsData, TransactionsReadPendingConfirmationTransactionsResponse, TransactionsReadTransactionData, TransactionsReadTransactionResponse, TransactionsUpdateTransactionData, TransactionsUpdateTransactionResponse, TransactionsDeleteTransactionData, TransactionsDeleteTransactionResponse, TransactionsCategorizeTransactionData, TransactionsCategorizeTransactionResponse, TransactionsConfirmTransactionData, TransactionsConfirmTransactionResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
 
 export class AccountsService {
     /**
@@ -303,6 +303,133 @@ export class CategoriesService {
             url: '/api/v1/categories/{id}',
             path: {
                 id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class ImportsService {
+    /**
+     * Upload Pdf
+     * Upload a Mastercard PDF statement for extraction.
+     * Returns preview of extracted transactions for user review.
+     *
+     * Requirements: 1.3, 1.5, 4.1
+     * @param data The data for the request.
+     * @param data.accountId Target account ID for imported transactions
+     * @param data.formData
+     * @returns ImportPreviewPublic Successful Response
+     * @throws ApiError
+     */
+    public static uploadPdf(data: ImportsUploadPdfData): CancelablePromise<ImportsUploadPdfResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/imports/upload',
+            query: {
+                account_id: data.accountId
+            },
+            formData: data.formData,
+            mediaType: 'multipart/form-data',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Confirm Import
+     * Confirm and persist extracted transactions.
+     *
+     * Requirements: 4.7, 4.8
+     * @param data The data for the request.
+     * @param data.importId
+     * @returns ImportResultPublic Successful Response
+     * @throws ApiError
+     */
+    public static confirmImport(data: ImportsConfirmImportData): CancelablePromise<ImportsConfirmImportResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/imports/{import_id}/confirm',
+            path: {
+                import_id: data.importId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Reject Import
+     * Reject import and discard extracted data.
+     *
+     * Requirements: 4.7, 4.9
+     * @param data The data for the request.
+     * @param data.importId
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static rejectImport(data: ImportsRejectImportData): CancelablePromise<ImportsRejectImportResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/imports/{import_id}/reject',
+            path: {
+                import_id: data.importId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * List Imports
+     * List all import sessions with status and statistics.
+     *
+     * Requirements: 5.2
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @param data.accountId Filter by account ID
+     * @param data.status Filter by import status
+     * @returns ImportSessionsPublic Successful Response
+     * @throws ApiError
+     */
+    public static listImports(data: ImportsListImportsData = {}): CancelablePromise<ImportsListImportsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/imports/',
+            query: {
+                skip: data.skip,
+                limit: data.limit,
+                account_id: data.accountId,
+                status: data.status
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Get Import
+     * Get import session details.
+     *
+     * Requirements: 5.3
+     * @param data The data for the request.
+     * @param data.importId
+     * @returns ImportSessionPublic Successful Response
+     * @throws ApiError
+     */
+    public static getImport(data: ImportsGetImportData): CancelablePromise<ImportsGetImportResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/imports/{import_id}',
+            path: {
+                import_id: data.importId
             },
             errors: {
                 422: 'Validation Error'

@@ -132,7 +132,7 @@ This plan implements the Mastercard PDF import feature following the existing Fa
     - Include warnings in preview response
     - _Requirements: 6.4_
 
-- [ ] 12. Regenerate frontend API client
+- [x] 12. Regenerate frontend API client
   - Run `npm run generate-client` in frontend directory
   - Verify new import endpoints are available in generated client
   - _Requirements: All frontend integration_

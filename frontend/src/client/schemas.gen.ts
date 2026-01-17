@@ -262,6 +262,19 @@ export const AccountsPublicSchema = {
     title: 'AccountsPublic'
 } as const;
 
+export const Body_imports_upload_pdfSchema = {
+    properties: {
+        file: {
+            type: 'string',
+            format: 'binary',
+            title: 'File'
+        }
+    },
+    type: 'object',
+    required: ['file'],
+    title: 'Body_imports-upload_pdf'
+} as const;
+
 export const Body_login_login_access_tokenSchema = {
     properties: {
         grant_type: {
@@ -447,6 +460,211 @@ export const HTTPValidationErrorSchema = {
     },
     type: 'object',
     title: 'HTTPValidationError'
+} as const;
+
+export const ImportPreviewPublicSchema = {
+    properties: {
+        import_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Import Id'
+        },
+        file_name: {
+            type: 'string',
+            title: 'File Name'
+        },
+        statement_date: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Statement Date'
+        },
+        statement_total_cents: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Statement Total Cents'
+        },
+        calculated_total_cents: {
+            type: 'integer',
+            title: 'Calculated Total Cents'
+        },
+        totals_match: {
+            type: 'boolean',
+            title: 'Totals Match'
+        },
+        transactions: {
+            items: {
+                '$ref': '#/components/schemas/TransactionPreview'
+            },
+            type: 'array',
+            title: 'Transactions'
+        },
+        warnings: {
+            items: {
+                type: 'string'
+            },
+            type: 'array',
+            title: 'Warnings'
+        }
+    },
+    type: 'object',
+    required: ['import_id', 'file_name', 'statement_date', 'statement_total_cents', 'calculated_total_cents', 'totals_match', 'transactions', 'warnings'],
+    title: 'ImportPreviewPublic',
+    description: 'Preview response after PDF extraction.'
+} as const;
+
+export const ImportResultPublicSchema = {
+    properties: {
+        import_session_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Import Session Id'
+        },
+        transactions_imported: {
+            type: 'integer',
+            title: 'Transactions Imported'
+        },
+        success: {
+            type: 'boolean',
+            title: 'Success'
+        }
+    },
+    type: 'object',
+    required: ['import_session_id', 'transactions_imported', 'success'],
+    title: 'ImportResultPublic',
+    description: 'Result after confirming import.'
+} as const;
+
+export const ImportSessionPublicSchema = {
+    properties: {
+        file_name: {
+            type: 'string',
+            maxLength: 255,
+            title: 'File Name'
+        },
+        account_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Account Id'
+        },
+        status: {
+            '$ref': '#/components/schemas/ImportStatus',
+            default: 'pending'
+        },
+        transaction_count: {
+            type: 'integer',
+            title: 'Transaction Count',
+            default: 0
+        },
+        statement_date: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Statement Date'
+        },
+        statement_total_cents: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Statement Total Cents'
+        },
+        calculated_total_cents: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Calculated Total Cents'
+        },
+        error_message: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Error Message'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        completed_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Completed At'
+        }
+    },
+    type: 'object',
+    required: ['file_name', 'account_id', 'id', 'created_at', 'completed_at'],
+    title: 'ImportSessionPublic'
+} as const;
+
+export const ImportSessionsPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/ImportSessionPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'ImportSessionsPublic'
+} as const;
+
+export const ImportStatusSchema = {
+    type: 'string',
+    enum: ['pending', 'completed', 'rejected', 'failed'],
+    title: 'ImportStatus'
 } as const;
 
 export const ItemCreateSchema = {
@@ -836,6 +1054,31 @@ export const TransactionCreateSchema = {
     type: 'object',
     required: ['date_transaction', 'description', 'amount_cents', 'type', 'account_id'],
     title: 'TransactionCreate'
+} as const;
+
+export const TransactionPreviewSchema = {
+    properties: {
+        date_transaction: {
+            type: 'string',
+            format: 'date',
+            title: 'Date Transaction'
+        },
+        description: {
+            type: 'string',
+            title: 'Description'
+        },
+        amount_cents: {
+            type: 'integer',
+            title: 'Amount Cents'
+        },
+        type: {
+            '$ref': '#/components/schemas/TransactionType'
+        }
+    },
+    type: 'object',
+    required: ['date_transaction', 'description', 'amount_cents', 'type'],
+    title: 'TransactionPreview',
+    description: 'Single transaction in import preview.'
 } as const;
 
 export const TransactionPublicSchema = {
