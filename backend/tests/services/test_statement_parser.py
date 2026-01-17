@@ -32,14 +32,23 @@ def desjardins_date_strategy(draw):
 
 @st.composite
 def valid_amount_strategy(draw):
-    """Generate valid amount strings in various formats."""
+    """Generate valid amount strings in various formats.
+    
+    Desjardins format:
+    - Regular amounts (no suffix) = expenses (purchases)
+    - CR suffix = income (credits/payments)
+    - Negative sign = expenses
+    """
     # Generate a decimal amount between 0.01 and 999999.99
     cents = draw(st.integers(min_value=1, max_value=99999999))
     amount = Decimal(cents) / 100
 
     # Choose format
     format_type = draw(st.sampled_from(["comma", "dot", "space_comma"]))
-    is_negative = draw(st.booleans())
+    
+    # Determine if this is a credit (income) or debit (expense)
+    # In Desjardins: CR suffix = income, regular/negative = expense
+    is_credit = draw(st.booleans())
 
     if format_type == "comma":
         # French format: 1234,56
@@ -57,15 +66,11 @@ def valid_amount_strategy(draw):
             int_str = str(int_part)
         amount_str = f"{int_str},{dec_part:02d}"
 
-    # Add negative indicator
-    if is_negative:
-        neg_format = draw(st.sampled_from(["prefix", "suffix"]))
-        if neg_format == "prefix":
-            amount_str = f"-{amount_str}"
-        else:
-            amount_str = f"{amount_str}-"
+    # Add credit indicator (CR suffix) for income
+    if is_credit:
+        amount_str = f"{amount_str}CR"
 
-    return amount_str, cents, is_negative
+    return amount_str, cents, is_credit
 
 
 class TestDateParsingRoundTrip:
@@ -137,13 +142,13 @@ class TestAmountSignClassification:
         """
         **Feature: mastercard-pdf-import, Property 3: Amount Sign Classification**
 
-        For any extracted transaction, if the original amount is negative
-        (purchase/debit), the transaction type SHALL be "expense"; if positive
-        (payment/credit), the type SHALL be "income".
+        For any extracted transaction, if the amount has a CR suffix (credit/payment),
+        the transaction type SHALL be "income"; otherwise (purchase/debit),
+        the type SHALL be "expense".
 
         **Validates: Requirements 2.4, 3.3**
         """
-        amount_str, expected_cents, is_negative = data
+        amount_str, expected_cents, is_credit = data
         parser = StatementParser()
 
         # Parse the amount
@@ -152,11 +157,11 @@ class TestAmountSignClassification:
         # Verify amount is correctly parsed (absolute value)
         assert parsed_cents == expected_cents
 
-        # Verify transaction type based on sign
-        if is_negative:
-            assert transaction_type == TransactionType.EXPENSE
-        else:
+        # Verify transaction type based on credit indicator
+        if is_credit:
             assert transaction_type == TransactionType.INCOME
+        else:
+            assert transaction_type == TransactionType.EXPENSE
 
 
 class TestDescriptionNormalizationIdempotence:

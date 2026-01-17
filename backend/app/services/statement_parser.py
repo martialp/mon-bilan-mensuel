@@ -59,11 +59,16 @@ class StatementParser:
 
     def parse_date(self, date_str: str, statement_year: int) -> date:
         """
-        Parse Desjardins date format (e.g., "15 JAN", "15 JANV") to ISO date.
+        Parse Desjardins date format to ISO date.
+        
+        Supports two formats:
+        - "DD MMM" (e.g., "15 JAN", "15 JANV") - month as text
+        - "DD MM" (e.g., "17 12", "03 01") - month as number
+        
         Uses statement_year to determine the full year.
 
         Args:
-            date_str: Date string in format "DD MMM" (e.g., "15 JAN", "15 JANV")
+            date_str: Date string in format "DD MMM" or "DD MM"
             statement_year: The year from the statement to use for the date
 
         Returns:
@@ -75,15 +80,32 @@ class StatementParser:
         # Normalize the string: uppercase and strip whitespace
         normalized = date_str.strip().upper()
 
-        # Pattern: day followed by month abbreviation
-        pattern = r"(\d{1,2})\s+([A-ZÉÛÔ]+)"
-        match = re.match(pattern, normalized)
+        # First try: numeric format "DD MM" (e.g., "17 12")
+        numeric_pattern = r"^(\d{1,2})\s+(\d{1,2})$"
+        numeric_match = re.match(numeric_pattern, normalized)
+        
+        if numeric_match:
+            day = int(numeric_match.group(1))
+            month = int(numeric_match.group(2))
+            
+            # Validate month range
+            if month < 1 or month > 12:
+                raise ValueError(f"Invalid month number: {month}")
+            
+            try:
+                return date(statement_year, month, day)
+            except ValueError as e:
+                raise ValueError(f"Invalid date: {date_str} for year {statement_year}") from e
 
-        if not match:
+        # Second try: text format "DD MMM" (e.g., "15 JAN")
+        text_pattern = r"(\d{1,2})\s+([A-ZÉÛÔ]+)"
+        text_match = re.match(text_pattern, normalized)
+
+        if not text_match:
             raise ValueError(f"Invalid date format: {date_str}")
 
-        day = int(match.group(1))
-        month_str = match.group(2)
+        day = int(text_match.group(1))
+        month_str = text_match.group(2)
 
         # Find the month number
         month = None
@@ -105,18 +127,24 @@ class StatementParser:
         Parse amount string to cents and determine transaction type.
 
         Args:
-            amount_str: Amount string (e.g., "123,45", "1 234,56", "123.45-", "-123,45")
+            amount_str: Amount string (e.g., "123,45", "1 234,56", "123.45-", "-123,45", "100,00CR")
 
         Returns:
             Tuple of (amount_cents, transaction_type).
-            - Positive amounts (credits/payments) -> income
-            - Negative amounts (purchases/debits) -> expense
+            - Credits (CR suffix or positive) -> income
+            - Debits (no CR suffix, regular amounts) -> expense
 
         Raises:
             ValueError: If the amount string cannot be parsed
         """
         # Normalize the string
-        normalized = amount_str.strip()
+        normalized = amount_str.strip().upper()
+
+        # Check for credit indicator (CR suffix means it's a credit/payment)
+        is_credit = False
+        if normalized.endswith("CR"):
+            is_credit = True
+            normalized = normalized[:-2].strip()
 
         # Check for negative indicator (trailing minus or leading minus)
         is_negative = False
@@ -147,14 +175,18 @@ class StatementParser:
         # Convert to cents (integer)
         amount_cents = abs(int(round(amount_decimal * 100)))
 
-        # Determine transaction type based on sign
+        # Determine transaction type based on indicators
         # In Desjardins statements:
-        # - Negative amounts (purchases/debits) are expenses
-        # - Positive amounts (payments/credits) are income
-        if is_negative:
+        # - CR suffix means credit/payment (income)
+        # - Regular amounts are purchases/debits (expense)
+        # - Negative sign also indicates expense
+        if is_credit:
+            transaction_type = TransactionType.INCOME
+        elif is_negative:
             transaction_type = TransactionType.EXPENSE
         else:
-            transaction_type = TransactionType.INCOME
+            # Default: regular amounts without CR are expenses (purchases)
+            transaction_type = TransactionType.EXPENSE
 
         return amount_cents, transaction_type
 

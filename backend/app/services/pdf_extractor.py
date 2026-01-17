@@ -130,7 +130,12 @@ class PDFExtractor:
     def _extract_transactions_from_table(
         self, table: list[list[str | None]]
     ) -> list[RawTransaction]:
-        """Extract transactions from a pdfplumber table."""
+        """Extract transactions from a pdfplumber table.
+        
+        Handles two formats:
+        1. Standard format: each row is a separate transaction
+        2. Desjardins format: columns contain newline-separated values for multiple transactions
+        """
         transactions = []
 
         for row in table:
@@ -139,30 +144,75 @@ class PDFExtractor:
 
             # Skip header rows
             first_cell = str(row[0] or "").strip().upper()
-            if first_cell in ("DATE", "TRANSACTION", "DATE DE", ""):
+            if any(header in first_cell for header in ("DATE", "TRANSACTION", "J M")):
+                continue
+            
+            # Skip rows that start with card holder info
+            if "CARTE" in first_cell or "TRANSACTIONS" in first_cell:
                 continue
 
-            # Try to parse as transaction row
-            # Expected format: [date, description, amount] or variations
-            date_str = str(row[0] or "").strip()
-            description = str(row[1] or "").strip() if len(row) > 1 else ""
-            amount_str = str(row[-1] or "").strip()  # Amount usually last column
+            # Get the raw cell values
+            date_col = str(row[0] or "").strip()
+            
+            # For Desjardins format, description is in column index 2 (after date d'inscription)
+            # and amount is in the last column
+            if len(row) >= 5:
+                # Desjardins format: [date_transaction, date_inscription, description, bonidollars, montant]
+                description_col = str(row[2] or "").strip()
+                amount_col = str(row[-1] or "").strip()
+            else:
+                # Standard format: [date, description, amount]
+                description_col = str(row[1] or "").strip() if len(row) > 1 else ""
+                amount_col = str(row[-1] or "").strip()
 
             # Validate date format (should start with digits)
-            if not date_str or not date_str[0].isdigit():
+            if not date_col or not date_col[0].isdigit():
                 continue
 
             # Skip if no amount
-            if not amount_str:
+            if not amount_col:
                 continue
 
-            transactions.append(
-                RawTransaction(
-                    date_str=date_str,
-                    description=description,
-                    amount_str=amount_str,
+            # Check if this is a multi-line cell (Desjardins format)
+            # where each column contains newline-separated values
+            date_lines = date_col.split("\n")
+            description_lines = description_col.split("\n")
+            amount_lines = amount_col.split("\n")
+
+            # If we have multiple lines, extract each transaction
+            if len(date_lines) > 1 and len(amount_lines) > 1:
+                # Desjardins multi-line format
+                num_transactions = min(len(date_lines), len(amount_lines))
+                
+                for i in range(num_transactions):
+                    date_str = date_lines[i].strip() if i < len(date_lines) else ""
+                    description = description_lines[i].strip() if i < len(description_lines) else ""
+                    amount_str = amount_lines[i].strip() if i < len(amount_lines) else ""
+                    
+                    # Skip empty entries
+                    if not date_str or not amount_str:
+                        continue
+                    
+                    # Validate date format
+                    if not date_str[0].isdigit():
+                        continue
+                    
+                    transactions.append(
+                        RawTransaction(
+                            date_str=date_str,
+                            description=description,
+                            amount_str=amount_str,
+                        )
+                    )
+            else:
+                # Single transaction per row
+                transactions.append(
+                    RawTransaction(
+                        date_str=date_col,
+                        description=description_col,
+                        amount_str=amount_col,
+                    )
                 )
-            )
 
         return transactions
 
