@@ -1,16 +1,30 @@
 import uuid
-from typing import Any
+from datetime import datetime
 from decimal import Decimal
+from typing import Any
 
 from sqlmodel import Session, select
 
 from app.core.security import get_password_hash, verify_password
 from app.models import (
-    Item, ItemCreate, User, UserCreate, UserUpdate,
-    Account, AccountCreate, AccountUpdate,
-    Category, CategoryCreate,
-    Transaction, TransactionCreate, TransactionUpdate,
-    AccountType, TransactionType
+    Account,
+    AccountCreate,
+    AccountType,
+    AccountUpdate,
+    Category,
+    CategoryCreate,
+    ImportSession,
+    ImportSessionCreate,
+    ImportStatus,
+    Item,
+    ItemCreate,
+    Transaction,
+    TransactionCreate,
+    TransactionType,
+    TransactionUpdate,
+    User,
+    UserCreate,
+    UserUpdate,
 )
 
 
@@ -128,13 +142,13 @@ def delete_account(*, session: Session, account_id: uuid.UUID) -> bool:
     account = get_account(session=session, account_id=account_id)
     if not account:
         return False
-    
+
     # Check if account has transactions
     statement = select(Transaction).where(Transaction.account_id == account_id)
     transactions = session.exec(statement).first()
     if transactions:
         raise ValueError("Cannot delete account with existing transactions")
-    
+
     session.delete(account)
     session.commit()
     return True
@@ -173,13 +187,13 @@ def delete_category(*, session: Session, category_id: uuid.UUID) -> bool:
     category = get_category(session=session, category_id=category_id)
     if not category:
         return False
-    
+
     # Check if category has transactions
     statement = select(Transaction).where(Transaction.category_id == category_id)
     transactions = session.exec(statement).first()
     if transactions:
         raise ValueError("Cannot delete category with existing transactions")
-    
+
     session.delete(category)
     session.commit()
     return True
@@ -240,7 +254,69 @@ def delete_transaction(*, session: Session, transaction_id: uuid.UUID) -> bool:
     transaction = get_transaction(session=session, transaction_id=transaction_id)
     if not transaction:
         return False
-    
+
     session.delete(transaction)
     session.commit()
     return True
+
+
+# Import Session CRUD operations
+def create_import_session(*, session: Session, import_session_in: ImportSessionCreate) -> ImportSession:
+    """Create a new import session."""
+    db_import_session = ImportSession.model_validate(import_session_in)
+    session.add(db_import_session)
+    session.commit()
+    session.refresh(db_import_session)
+    return db_import_session
+
+
+def get_import_session(*, session: Session, import_session_id: uuid.UUID) -> ImportSession | None:
+    """Get import session by ID."""
+    statement = select(ImportSession).where(ImportSession.id == import_session_id)
+    return session.exec(statement).first()
+
+
+def get_import_sessions(
+    *,
+    session: Session,
+    skip: int = 0,
+    limit: int = 100,
+    account_id: uuid.UUID | None = None
+) -> list[ImportSession]:
+    """
+    Get all import sessions with pagination, ordered by created_at descending.
+    Optionally filter by account_id.
+    """
+    statement = select(ImportSession)
+    if account_id is not None:
+        statement = statement.where(ImportSession.account_id == account_id)
+    statement = statement.order_by(ImportSession.created_at.desc()).offset(skip).limit(limit)
+    return list(session.exec(statement).all())
+
+
+def update_import_session(
+    *,
+    session: Session,
+    db_import_session: ImportSession,
+    status: ImportStatus | None = None,
+    transaction_count: int | None = None,
+    error_message: str | None = None,
+    completed_at: datetime | None = None
+) -> ImportSession:
+    """
+    Update an existing import session.
+    Only updates fields that are explicitly provided.
+    """
+    if status is not None:
+        db_import_session.status = status
+    if transaction_count is not None:
+        db_import_session.transaction_count = transaction_count
+    if error_message is not None:
+        db_import_session.error_message = error_message
+    if completed_at is not None:
+        db_import_session.completed_at = completed_at
+
+    session.add(db_import_session)
+    session.commit()
+    session.refresh(db_import_session)
+    return db_import_session

@@ -72,10 +72,10 @@ This plan implements the Mastercard PDF import feature following the existing Fa
     - **Property 12: Data Consistency on Failure**
     - **Validates: Requirements 6.3**
 
-- [ ] 6. Checkpoint - Ensure all service tests pass
+- [x] 6. Checkpoint - Ensure all service tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 7. Implement Import CRUD operations
+- [x] 7. Implement Import CRUD operations
   - Add import session CRUD functions to `backend/app/crud.py`
     - `create_import_session()`
     - `get_import_session()`
