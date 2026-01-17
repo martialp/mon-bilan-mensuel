@@ -83,8 +83,8 @@ This plan implements the Mastercard PDF import feature following the existing Fa
     - `update_import_session()`
   - _Requirements: 5.1, 5.2, 5.3, 5.5_
 
-- [ ] 8. Implement Import API routes
-  - [ ] 8.1 Create `backend/app/api/routes/imports.py`
+- [x] 8. Implement Import API routes
+  - [x] 8.1 Create `backend/app/api/routes/imports.py`
     - Implement `POST /imports/upload` endpoint for PDF upload and extraction
     - Implement `POST /imports/{id}/confirm` endpoint for import confirmation
     - Implement `POST /imports/{id}/reject` endpoint for import rejection
@@ -92,16 +92,16 @@ This plan implements the Mastercard PDF import feature following the existing Fa
     - Implement `GET /imports/{id}` endpoint for import details
     - _Requirements: 1.3, 1.5, 4.1, 4.4, 4.7, 5.2, 5.3_
 
-  - [ ] 8.2 Register import routes in `backend/app/api/main.py`
+  - [x] 8.2 Register import routes in `backend/app/api/main.py`
     - Add `from app.api.routes import imports`
     - Add `api_router.include_router(imports.router)`
     - _Requirements: All API requirements_
 
-  - [ ] 8.3 Write property test for preview data completeness
+  - [x] 8.3 Write property test for preview data completeness
     - **Property 8: Preview Data Completeness**
     - **Validates: Requirements 4.2, 4.3**
 
-  - [ ] 8.4 Write property test for total validation consistency
+  - [x] 8.4 Write property test for total validation consistency
     - **Property 9: Total Validation Consistency**
     - **Validates: Requirements 4.5, 4.6**
 
