@@ -119,7 +119,7 @@ This plan implements the Mastercard PDF import feature following the existing Fa
     - **Property 11: Import Session Tracking**
     - **Validates: Requirements 5.1, 5.3, 5.4**
 
-- [ ] 10. Checkpoint - Ensure all backend tests pass
+- [x] 10. Checkpoint - Ensure all backend tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 - [x] 11. Add error handling and edge cases
@@ -137,7 +137,7 @@ This plan implements the Mastercard PDF import feature following the existing Fa
   - Verify new import endpoints are available in generated client
   - _Requirements: All frontend integration_
 
-- [ ] 13. Final checkpoint - Full integration test
+- [x] 13. Final checkpoint - Full integration test
   - Ensure all tests pass, ask the user if questions arise.
   - Test full flow: upload → preview → confirm
   - Test rejection flow: upload → preview → reject

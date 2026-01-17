@@ -7,7 +7,7 @@ from sqlmodel import Session, delete
 from app.core.config import settings
 from app.core.db import engine, init_db
 from app.main import app
-from app.models import Account, Category, Item, Transaction, User
+from app.models import Account, Category, ImportSession, Item, Transaction, User
 from tests.utils.user import authentication_token_from_email
 from tests.utils.utils import get_superuser_token_headers
 
@@ -19,6 +19,8 @@ def db() -> Generator[Session, None, None]:
         yield session
         # Clean up in order respecting foreign key constraints
         statement = delete(Transaction)
+        session.execute(statement)
+        statement = delete(ImportSession)
         session.execute(statement)
         statement = delete(Category)
         session.execute(statement)
