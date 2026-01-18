@@ -63,15 +63,15 @@ This implementation plan breaks down the PDF Import UI feature into incremental 
     - Handle errors with toast, keep preview open
     - _Requirements: 4.5, 4.6, 4.7_
 
-- [ ] 5. Implement import history component
-  - [ ] 5.1 Add history column definitions to `frontend/src/components/Imports/columns.tsx`
+- [x] 5. Implement import history component
+  - [x] 5.1 Add history column definitions to `frontend/src/components/Imports/columns.tsx`
     - Define historyColumns for ImportSessionPublic table
     - Add columns: File Name, Account, Status, Transactions, Date
     - Implement status badge with correct variants (default/success/secondary/destructive)
     - Add date formatting for created_at
     - _Requirements: 5.2, 5.4_
   
-  - [ ] 5.2 Create `frontend/src/components/Imports/ImportHistory.tsx`
+  - [x] 5.2 Create `frontend/src/components/Imports/ImportHistory.tsx`
     - Fetch import history using useSuspenseQuery with ImportsService.listImports
     - Render DataTable with historyColumns
     - Show empty state "No imports yet" when data is empty
