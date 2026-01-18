@@ -6,21 +6,21 @@ This implementation plan breaks down the PDF Import UI feature into incremental 
 
 ## Tasks
 
-- [ ] 1. Set up route and page structure
-  - [ ] 1.1 Create the imports route file at `frontend/src/routes/_layout/imports.tsx`
+- [x] 1. Set up route and page structure
+  - [x] 1.1 Create the imports route file at `frontend/src/routes/_layout/imports.tsx`
     - Define route with `createFileRoute("/_layout/imports")`
     - Add page head meta with title "Import Statements - Personal Finance Tracker"
     - Create basic page component with header "Import Statements" and description
     - _Requirements: 1.3_
   
-  - [ ] 1.2 Update sidebar navigation in `frontend/src/components/Sidebar/AppSidebar.tsx`
+  - [x] 1.2 Update sidebar navigation in `frontend/src/components/Sidebar/AppSidebar.tsx`
     - Import `Upload` icon from lucide-react
     - Add Import menu item between Transactions and Categories
     - Set path to "/imports"
     - _Requirements: 1.1, 1.2_
 
-- [ ] 2. Implement upload dialog component
-  - [ ] 2.1 Create `frontend/src/components/Imports/UploadDialog.tsx`
+- [x] 2. Implement upload dialog component
+  - [x] 2.1 Create `frontend/src/components/Imports/UploadDialog.tsx`
     - Create Zod schema for file (PDF only) and accountId validation
     - Implement dialog with file input and account selector
     - Use React Hook Form for form state management
@@ -30,14 +30,14 @@ This implementation plan breaks down the PDF Import UI feature into incremental 
     - Pass preview data to parent on success
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7_
 
-- [ ] 3. Implement transaction preview component
-  - [ ] 3.1 Create column definitions at `frontend/src/components/Imports/columns.tsx`
+- [x] 3. Implement transaction preview component
+  - [x] 3.1 Create column definitions at `frontend/src/components/Imports/columns.tsx`
     - Define previewColumns for TransactionPreview table (Date, Description, Amount, Type)
     - Add currency formatting for amount_cents
     - Add type badge rendering (expense/income/transfer)
     - _Requirements: 3.3_
   
-  - [ ] 3.2 Create `frontend/src/components/Imports/ImportPreview.tsx`
+  - [x] 3.2 Create `frontend/src/components/Imports/ImportPreview.tsx`
     - Display file name and statement date
     - Display transaction table using DataTable with previewColumns
     - Show statement total and calculated total

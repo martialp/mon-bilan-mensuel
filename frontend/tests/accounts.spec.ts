@@ -93,14 +93,16 @@ test.describe("Account Management", () => {
     // Wait for the table to update, then navigate to find the account
     // The account name starts with "Test Account" so it will be near the end alphabetically
     await page.waitForTimeout(500) // Wait for query invalidation
-    
+
     const lastPageButton = page.getByRole("button", { name: "Go to last page" })
     if (await lastPageButton.isEnabled()) {
       await lastPageButton.click()
     }
 
     // Account should appear in the list
-    await expect(page.getByRole("cell", { name: accountName })).toBeVisible({ timeout: 10000 })
+    await expect(page.getByRole("cell", { name: accountName })).toBeVisible({
+      timeout: 10000,
+    })
   })
 
   test("Edit account dialog opens with existing data", async ({ page }) => {
@@ -119,7 +121,7 @@ test.describe("Account Management", () => {
 
     // Wait for the table to update, then navigate to find the account
     await page.waitForTimeout(500)
-    
+
     const lastPageButton = page.getByRole("button", { name: "Go to last page" })
     if (await lastPageButton.isEnabled()) {
       await lastPageButton.click()
@@ -153,7 +155,7 @@ test.describe("Account Management", () => {
 
     // Wait for the table to update, then navigate to find the account
     await page.waitForTimeout(500)
-    
+
     const lastPageButton = page.getByRole("button", { name: "Go to last page" })
     if (await lastPageButton.isEnabled()) {
       await lastPageButton.click()

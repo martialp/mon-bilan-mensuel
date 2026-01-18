@@ -80,7 +80,9 @@ test.describe("Category Management", () => {
     }
 
     // Category should appear in the list
-    await expect(page.getByRole("cell", { name: categoryName })).toBeVisible({ timeout: 10000 })
+    await expect(page.getByRole("cell", { name: categoryName })).toBeVisible({
+      timeout: 10000,
+    })
   })
 
   test("Edit category dialog opens with existing data", async ({ page }) => {

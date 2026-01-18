@@ -93,7 +93,7 @@ test("Sign up with existing email", async ({ page }) => {
   // Error is shown via toast (note: message has a period at the end)
   // Use longer timeout since the API call needs to complete
   await expect(
-    page.getByText("The user with this email already exists in the system.")
+    page.getByText("The user with this email already exists in the system."),
   ).toBeVisible({ timeout: 10000 })
 })
 
