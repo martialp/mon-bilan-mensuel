@@ -1,6 +1,7 @@
+import { useMutation } from "@tanstack/react-query"
 import { AlertTriangle, FileText } from "lucide-react"
 
-import type { ImportPreviewPublic } from "@/client"
+import { type ImportPreviewPublic, ImportsService } from "@/client"
 import { DataTable } from "@/components/Common/DataTable"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -13,25 +14,61 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { LoadingButton } from "@/components/ui/loading-button"
+import useCustomToast from "@/hooks/useCustomToast"
 import { formatCurrency, formatDate } from "@/lib/finance"
+import { extractErrorMessage } from "@/utils"
 import { previewColumns } from "./columns"
 
 interface ImportPreviewProps {
   preview: ImportPreviewPublic
   onConfirm: () => void
   onReject: () => void
-  isConfirming: boolean
-  isRejecting: boolean
 }
 
 const ImportPreview = ({
   preview,
   onConfirm,
   onReject,
-  isConfirming,
-  isRejecting,
 }: ImportPreviewProps) => {
-  const isLoading = isConfirming || isRejecting
+  const { showSuccessToast, showErrorToast, showInfoToast } = useCustomToast()
+
+  const confirmMutation = useMutation({
+    mutationFn: () =>
+      ImportsService.confirmImport({ importId: preview.import_id }),
+    onSuccess: (result) => {
+      showSuccessToast(
+        `Successfully imported ${result.transactions_imported} transactions`,
+      )
+      onConfirm()
+    },
+    onError: (err) => {
+      const errorMessage = extractErrorMessage(err as Error)
+      showErrorToast(errorMessage)
+    },
+  })
+
+  const rejectMutation = useMutation({
+    mutationFn: () =>
+      ImportsService.rejectImport({ importId: preview.import_id }),
+    onSuccess: () => {
+      showInfoToast("Import cancelled")
+      onReject()
+    },
+    onError: (err) => {
+      const errorMessage = extractErrorMessage(err as Error)
+      showErrorToast(errorMessage)
+    },
+  })
+
+  const isLoading = confirmMutation.isPending || rejectMutation.isPending
+
+  const handleConfirm = () => {
+    confirmMutation.mutate()
+  }
+
+  const handleReject = () => {
+    rejectMutation.mutate()
+  }
 
   return (
     <Card>
@@ -113,10 +150,14 @@ const ImportPreview = ({
       </CardContent>
 
       <CardFooter className="flex justify-end gap-2">
-        <Button variant="outline" onClick={onReject} disabled={isLoading}>
-          {isRejecting ? "Cancelling..." : "Cancel"}
+        <Button variant="outline" onClick={handleReject} disabled={isLoading}>
+          {rejectMutation.isPending ? "Cancelling..." : "Cancel"}
         </Button>
-        <LoadingButton onClick={onConfirm} loading={isConfirming} disabled={isLoading}>
+        <LoadingButton
+          onClick={handleConfirm}
+          loading={confirmMutation.isPending}
+          disabled={isLoading}
+        >
           Confirm Import
         </LoadingButton>
       </CardFooter>

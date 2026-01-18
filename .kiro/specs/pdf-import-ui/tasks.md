@@ -48,15 +48,15 @@ This implementation plan breaks down the PDF Import UI feature into incremental 
     - Handle loading states for both actions
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 4.1, 4.8_
 
-- [ ] 4. Implement import confirmation and rejection
-  - [ ] 4.1 Add confirmation mutation to ImportPreview
+- [x] 4. Implement import confirmation and rejection
+  - [x] 4.1 Add confirmation mutation to ImportPreview
     - Call ImportsService.confirmImport with import_id
     - Show success toast with transaction count on success
     - Call onConfirm callback to close preview and refresh history
     - Handle errors with toast, keep preview open
     - _Requirements: 4.2, 4.3, 4.4_
   
-  - [ ] 4.2 Add rejection mutation to ImportPreview
+  - [x] 4.2 Add rejection mutation to ImportPreview
     - Call ImportsService.rejectImport with import_id
     - Show info toast "Import cancelled" on success
     - Call onReject callback to close preview and refresh history
