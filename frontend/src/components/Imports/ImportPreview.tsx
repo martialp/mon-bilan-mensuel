@@ -16,7 +16,7 @@ import {
 import { LoadingButton } from "@/components/ui/loading-button"
 import useCustomToast from "@/hooks/useCustomToast"
 import { formatCurrency, formatDate } from "@/lib/finance"
-import { extractErrorMessage } from "@/utils"
+import { ERROR_CODES, extractErrorMessage, getErrorCode } from "@/utils"
 import { previewColumns } from "./columns"
 
 interface ImportPreviewProps {
@@ -30,7 +30,13 @@ const ImportPreview = ({
   onConfirm,
   onReject,
 }: ImportPreviewProps) => {
-  const { showSuccessToast, showErrorToast, showInfoToast } = useCustomToast()
+  const {
+    showSuccessToast,
+    showErrorToast,
+    showInfoToast,
+    showRetryToast,
+    showNetworkErrorToast,
+  } = useCustomToast()
 
   const confirmMutation = useMutation({
     mutationFn: () =>
@@ -42,7 +48,26 @@ const ImportPreview = ({
       onConfirm()
     },
     onError: (err) => {
+      const errorCode = getErrorCode(err as Error)
       const errorMessage = extractErrorMessage(err as Error)
+
+      // Handle network errors with retry option - keep preview open
+      if (errorCode === ERROR_CODES.NETWORK_ERROR) {
+        showNetworkErrorToast(() => {
+          confirmMutation.mutate()
+        })
+        return
+      }
+
+      // Handle server errors with retry option - keep preview open
+      if (errorCode === ERROR_CODES.SERVER_ERROR) {
+        showRetryToast(errorMessage, () => {
+          confirmMutation.mutate()
+        })
+        return
+      }
+
+      // Requirement 6.4: Show error message and keep preview open
       showErrorToast(errorMessage)
     },
   })
@@ -55,7 +80,26 @@ const ImportPreview = ({
       onReject()
     },
     onError: (err) => {
+      const errorCode = getErrorCode(err as Error)
       const errorMessage = extractErrorMessage(err as Error)
+
+      // Handle network errors with retry option - keep preview open
+      if (errorCode === ERROR_CODES.NETWORK_ERROR) {
+        showNetworkErrorToast(() => {
+          rejectMutation.mutate()
+        })
+        return
+      }
+
+      // Handle server errors with retry option - keep preview open
+      if (errorCode === ERROR_CODES.SERVER_ERROR) {
+        showRetryToast(errorMessage, () => {
+          rejectMutation.mutate()
+        })
+        return
+      }
+
+      // Show error message and keep preview open
       showErrorToast(errorMessage)
     },
   })
@@ -127,8 +171,9 @@ const ImportPreview = ({
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle>Totals Mismatch</AlertTitle>
             <AlertDescription>
-              The statement total ({formatCurrency(preview.statement_total_cents)}
-              ) does not match the calculated total (
+              The statement total (
+              {formatCurrency(preview.statement_total_cents)}) does not match
+              the calculated total (
               {formatCurrency(preview.calculated_total_cents)}). Please review
               the transactions carefully.
             </AlertDescription>

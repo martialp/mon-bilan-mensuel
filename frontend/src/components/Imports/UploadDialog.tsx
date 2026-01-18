@@ -66,7 +66,12 @@ type FormData = z.infer<typeof formSchema>
 const UploadDialog = ({ onUploadSuccess }: UploadDialogProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const { showSuccessToast, showErrorToast, showRetryToast } = useCustomToast()
+  const {
+    showSuccessToast,
+    showErrorToast,
+    showRetryToast,
+    showNetworkErrorToast,
+  } = useCustomToast()
 
   const { data: accountsData } = useSuspenseQuery({
     queryKey: ["accounts"],
@@ -101,21 +106,47 @@ const UploadDialog = ({ onUploadSuccess }: UploadDialogProps) => {
     onError: (err) => {
       const errorCode = getErrorCode(err as Error)
       const errorMessage = extractErrorMessage(err as Error)
+      const lowerMessage = errorMessage.toLowerCase()
 
+      // Requirement 6.5: Network error with retry option
       if (errorCode === ERROR_CODES.NETWORK_ERROR) {
+        showNetworkErrorToast(() => {
+          mutation.mutate(form.getValues())
+        })
+        return
+      }
+
+      // Requirement 6.1: Invalid file type error
+      if (
+        lowerMessage.includes("invalid file type") ||
+        lowerMessage.includes("invalid pdf") ||
+        (lowerMessage.includes("invalid") && lowerMessage.includes("file")) ||
+        lowerMessage.includes("not a valid pdf")
+      ) {
+        showErrorToast("Invalid file type. Please upload a PDF file.")
+        return
+      }
+
+      // Requirement 6.3: No transactions found error
+      if (
+        lowerMessage.includes("no transactions") ||
+        lowerMessage.includes("no transaction found") ||
+        lowerMessage.includes("could not extract")
+      ) {
+        showErrorToast("No transactions found in the PDF")
+        return
+      }
+
+      // Requirement 6.6: Server errors with retry option
+      if (errorCode === ERROR_CODES.SERVER_ERROR) {
         showRetryToast(errorMessage, () => {
           mutation.mutate(form.getValues())
         })
-      } else if (errorMessage.toLowerCase().includes("no transactions")) {
-        showErrorToast("No transactions found in the PDF")
-      } else if (
-        errorMessage.toLowerCase().includes("invalid") &&
-        errorMessage.toLowerCase().includes("file")
-      ) {
-        showErrorToast("Invalid file type. Please upload a PDF file.")
-      } else {
-        showErrorToast(errorMessage)
+        return
       }
+
+      // Requirement 6.2: Show API error messages for other failures
+      showErrorToast(errorMessage)
     },
   })
 

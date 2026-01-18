@@ -35,7 +35,7 @@ export function ImportHistory() {
 
   const columns = useMemo(
     () => createHistoryColumns({ accounts: accountsMap }),
-    [accountsMap]
+    [accountsMap],
   )
 
   if (imports.data.length === 0) {

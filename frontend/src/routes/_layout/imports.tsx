@@ -1,5 +1,12 @@
+import { useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
-import { Upload } from "lucide-react"
+import { Suspense, useState } from "react"
+
+import type { ImportPreviewPublic } from "@/client"
+import { ImportHistory } from "@/components/Imports/ImportHistory"
+import ImportPreview from "@/components/Imports/ImportPreview"
+import UploadDialog from "@/components/Imports/UploadDialog"
+import PendingImports from "@/components/Pending/PendingImports"
 
 export const Route = createFileRoute("/_layout/imports")({
   component: Imports,
@@ -13,6 +20,26 @@ export const Route = createFileRoute("/_layout/imports")({
 })
 
 function Imports() {
+  const [previewData, setPreviewData] = useState<ImportPreviewPublic | null>(
+    null,
+  )
+  const queryClient = useQueryClient()
+
+  const handleUploadSuccess = (preview: ImportPreviewPublic) => {
+    setPreviewData(preview)
+  }
+
+  const handleConfirm = () => {
+    setPreviewData(null)
+    queryClient.invalidateQueries({ queryKey: ["imports"] })
+    queryClient.invalidateQueries({ queryKey: ["transactions"] })
+  }
+
+  const handleReject = () => {
+    setPreviewData(null)
+    queryClient.invalidateQueries({ queryKey: ["imports"] })
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
@@ -24,16 +51,20 @@ function Imports() {
             Import transactions from PDF statements
           </p>
         </div>
+        <UploadDialog onUploadSuccess={handleUploadSuccess} />
       </div>
-      <div className="flex flex-col items-center justify-center text-center py-12">
-        <div className="rounded-full bg-muted p-4 mb-4">
-          <Upload className="h-8 w-8 text-muted-foreground" />
-        </div>
-        <h3 className="text-lg font-semibold">Import PDF statements</h3>
-        <p className="text-muted-foreground">
-          Upload your bank statements to import transactions
-        </p>
-      </div>
+
+      {previewData && (
+        <ImportPreview
+          preview={previewData}
+          onConfirm={handleConfirm}
+          onReject={handleReject}
+        />
+      )}
+
+      <Suspense fallback={<PendingImports />}>
+        <ImportHistory />
+      </Suspense>
     </div>
   )
 }

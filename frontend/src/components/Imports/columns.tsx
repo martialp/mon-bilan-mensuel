@@ -8,7 +8,12 @@ import type {
   TransactionType,
 } from "@/client"
 import { Badge } from "@/components/ui/badge"
-import { formatCurrency, formatDate, formatDateTime, getTransactionTypeColor } from "@/lib/finance"
+import {
+  formatCurrency,
+  formatDate,
+  formatDateTime,
+  getTransactionTypeColor,
+} from "@/lib/finance"
 import { cn } from "@/lib/utils"
 
 const transactionTypeConfig: Record<
@@ -101,11 +106,13 @@ export const previewColumns: ColumnDef<TransactionPreview>[] = [
   },
 ]
 
-
 // Status badge configuration for import sessions
 const importStatusConfig: Record<
   ImportStatus,
-  { label: string; variant: "default" | "secondary" | "destructive" | "outline" }
+  {
+    label: string
+    variant: "default" | "secondary" | "destructive" | "outline"
+  }
 > = {
   pending: { label: "Pending", variant: "default" },
   completed: { label: "Completed", variant: "outline" },
@@ -120,7 +127,8 @@ function ImportStatusBadge({ status }: { status: ImportStatus }) {
     <Badge
       variant={config.variant}
       className={cn(
-        status === "completed" && "border-green-500 text-green-600 dark:text-green-400"
+        status === "completed" &&
+          "border-green-500 text-green-600 dark:text-green-400",
       )}
     >
       {config.label}
@@ -133,7 +141,7 @@ export interface HistoryColumnContext {
 }
 
 export const createHistoryColumns = (
-  context: HistoryColumnContext
+  context: HistoryColumnContext,
 ): ColumnDef<ImportSessionPublic>[] => [
   {
     accessorKey: "file_name",

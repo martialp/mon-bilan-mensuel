@@ -78,8 +78,8 @@ This implementation plan breaks down the PDF Import UI feature into incremental 
     - Support pagination through DataTable
     - _Requirements: 5.1, 5.3, 5.5, 5.6_
 
-- [ ] 6. Wire components together in imports page
-  - [ ] 6.1 Complete the imports route component
+- [x] 6. Wire components together in imports page
+  - [x] 6.1 Complete the imports route component
     - Add state for previewData (ImportPreviewPublic | null)
     - Render UploadDialog with onUploadSuccess handler
     - Conditionally render ImportPreview when previewData exists
@@ -87,8 +87,8 @@ This implementation plan breaks down the PDF Import UI feature into incremental 
     - Handle confirm/reject callbacks to clear preview and invalidate queries
     - _Requirements: 3.1, 4.4, 4.7_
 
-- [ ] 7. Implement error handling
-  - [ ] 7.1 Add error handling to UploadDialog
+- [x] 7. Implement error handling
+  - [x] 7.1 Add error handling to UploadDialog
     - Use extractErrorMessage and getErrorCode from utils
     - Show specific error for invalid file type
     - Show specific error for no transactions found
@@ -96,36 +96,36 @@ This implementation plan breaks down the PDF Import UI feature into incremental 
     - Show API error messages for other failures
     - _Requirements: 6.1, 6.2, 6.3, 6.5, 6.6_
   
-  - [ ] 7.2 Add error handling to ImportPreview
+  - [x] 7.2 Add error handling to ImportPreview
     - Handle confirmation errors with toast, keep preview open
     - Handle rejection errors with toast, keep preview open
     - Use existing error utilities for consistent messaging
     - _Requirements: 6.4_
 
-- [ ] 8. Checkpoint - Ensure all components work together
+- [x] 8. Checkpoint - Ensure all components work together
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 9. Write E2E tests
-  - [ ] 9.1 Create `frontend/tests/imports.spec.ts` with navigation tests
+- [x] 9. Write E2E tests
+  - [x] 9.1 Create `frontend/tests/imports.spec.ts` with navigation tests
     - Test Import page is accessible from sidebar
     - Test page displays header and description
     - Test Add Import button is visible
     - _Requirements: 1.1, 1.2, 1.3, 2.1_
   
-  - [ ] 9.2 Add upload dialog tests
+  - [x] 9.2 Add upload dialog tests
     - Test dialog opens with required fields
     - Test file input accepts only PDF
     - Test account selector is populated
     - Test form validation errors
     - _Requirements: 2.2, 2.3, 2.4, 2.5_
   
-  - [ ] 9.3 Add history table tests
+  - [x] 9.3 Add history table tests
     - Test history table displays past imports
     - Test status badges have correct styling
     - Test empty state when no imports
     - _Requirements: 5.1, 5.2, 5.4, 5.5_
 
-- [ ] 10. Final checkpoint - Verify complete implementation
+- [x] 10. Final checkpoint - Verify complete implementation
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Notes
