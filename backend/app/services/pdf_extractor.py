@@ -33,6 +33,13 @@ class PDFExtractor:
 
     MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024  # 10MB
 
+    # Regex pattern for currency conversion lines in foreign currency transactions
+    # Pattern: <amount> <currency> TX: <exchange_rate>
+    # Examples: "2,18 EURO TX: 1.527522", "15,00 USD TX: 1.345678"
+    CURRENCY_CONVERSION_PATTERN = re.compile(
+        r"^\s*\d+[,\.]\d{2}\s+[A-Z]{2,4}\s+TX:\s*\d+[,\.]\d+\s*$"
+    )
+
     # French month abbreviations used by Desjardins
     MONTH_MAP = {
         "JAN": 1,
@@ -135,6 +142,39 @@ class PDFExtractor:
                     continue
         return None
 
+    def _is_currency_conversion_line(self, line: str) -> bool:
+        """
+        Check if a line is a currency conversion info line.
+        
+        Currency conversion lines appear in foreign currency transactions and follow
+        the pattern: "<amount> <currency> TX: <exchange_rate>"
+        Examples:
+            - "2,18 EURO TX: 1.527522"
+            - "15,00 USD TX: 1.345678"
+        
+        Args:
+            line: A single line from the description column
+            
+        Returns:
+            True if the line is a currency conversion line, False otherwise
+        """
+        return bool(self.CURRENCY_CONVERSION_PATTERN.match(line))
+
+    def _filter_currency_conversion_lines(self, description_lines: list[str]) -> list[str]:
+        """
+        Filter out currency conversion lines from description lines.
+        
+        Args:
+            description_lines: List of description lines from a multi-line cell
+            
+        Returns:
+            Filtered list with currency conversion lines removed
+        """
+        return [
+            line for line in description_lines
+            if not self._is_currency_conversion_line(line)
+        ]
+
     def _extract_transactions_from_table(
         self, table: list[list[str | None]]
     ) -> list[RawTransaction]:
@@ -190,6 +230,11 @@ class PDFExtractor:
             # If we have multiple lines, extract each transaction
             if len(date_lines) > 1 and len(amount_lines) > 1:
                 # Desjardins multi-line format
+                # Filter out currency conversion lines from descriptions before alignment
+                # These lines (e.g., "2,18 EURO TX: 1.527522") have no corresponding amount
+                # and would cause misalignment if not removed
+                description_lines = self._filter_currency_conversion_lines(description_lines)
+                
                 num_transactions = min(len(date_lines), len(amount_lines))
                 
                 for i in range(num_transactions):
