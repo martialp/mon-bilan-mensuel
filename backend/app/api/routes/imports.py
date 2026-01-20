@@ -173,12 +173,15 @@ async def upload_pdf(
             raise_import_no_transactions()
         
         # Calculate total from parsed transactions
+        # For verification, we calculate expenses-only total since that's what
+        # the Desjardins statement "TOTAL" represents (excludes credits/payments)
         calculated_total_cents = sum(
-            txn.amount_cents if txn.transaction_type == TransactionType.INCOME else -txn.amount_cents
+            txn.amount_cents
             for txn in parsed_transactions
+            if txn.transaction_type == TransactionType.EXPENSE
         )
         
-        # Check if totals match
+        # Check if totals match (comparing expenses-only totals)
         statement_total_cents = extraction_result.statement_total_cents
         totals_match = (
             statement_total_cents is not None and
@@ -187,8 +190,8 @@ async def upload_pdf(
         
         if statement_total_cents is not None and not totals_match:
             warnings.append(
-                f"Statement total ({statement_total_cents / 100:.2f}) does not match "
-                f"calculated total ({calculated_total_cents / 100:.2f})"
+                f"Statement expenses total ({statement_total_cents / 100:.2f}) does not match "
+                f"calculated expenses total ({calculated_total_cents / 100:.2f})"
             )
         
         # Create import session in PENDING status

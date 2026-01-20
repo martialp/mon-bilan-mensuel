@@ -108,12 +108,12 @@ class TransactionImporter:
             )
 
         try:
-            # Calculate total for the import session
+            # Calculate total for the import session (expenses-only for verification)
+            # This matches the Desjardins statement "TOTAL" which only includes expenses
             calculated_total_cents = sum(
                 txn.amount_cents
-                if txn.transaction_type.value == "income"
-                else -txn.amount_cents
                 for txn in transactions
+                if txn.transaction_type.value == "expense"
             )
 
             # Create import session

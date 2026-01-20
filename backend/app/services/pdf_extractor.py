@@ -108,11 +108,19 @@ class PDFExtractor:
         return None
 
     def _parse_statement_total(self, text: str) -> int | None:
-        """Extract statement total from PDF text."""
-        # Look for patterns like "NOUVEAU SOLDE 1 234,56 $" or "SOLDE 1234,56$"
+        """Extract statement total (expenses only) from PDF text.
+        
+        In Desjardins statements, the "TOTAL" line at the end of the transactions
+        section represents the sum of all expenses (debits) only, not including
+        credits/payments. This is the value we extract for verification.
+        """
+        # Look for "TOTAL" followed by amount - this is the expenses total
+        # Pattern matches lines like "TOTAL 4 185,26" at the end of transactions
         patterns = [
-            r"NOUVEAU\s+SOLDE\s*[:\s]*([0-9\s]+[,\.]\d{2})\s*\$?",
-            r"SOLDE\s+(?:AU|DU|COURANT)[^0-9]*([0-9\s]+[,\.]\d{2})\s*\$?",
+            # Primary: "TOTAL" followed by amount (expenses total in Desjardins statements)
+            r"TOTAL\s+([0-9\s]+[,\.]\d{2})\s*\$?",
+            # Fallback: "Achats / débits" line in the summary section
+            r"ACHATS\s*/\s*D[ÉE]BITS\s*\+?\s*([0-9\s]+[,\.]\d{2})\s*\$?",
         ]
 
         for pattern in patterns:
